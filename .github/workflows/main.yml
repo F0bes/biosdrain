@@ -1,0 +1,38 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ps2dev/ps2dev:latest
+    steps:
+    - name: Install dependencies
+      run: |
+        apk add build-base git bash
+    - uses: actions/checkout@v2
+    - run: |
+        git config --global --add safe.directory /__w/biosdrain/biosdrain
+        git fetch --prune --unshallow
+    - name: Compile project
+      run: |
+        make clean all
+        mkdir artifacts
+        cp biosdrain.elf artifacts/biosdrain.elf
+    - name: Upload ELF
+      uses: actions/upload-artifact@v2
+      with: 
+        name: biosdrain
+        path: artifacts
+
