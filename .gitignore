@@ -1,4 +1,13 @@
 *.o
+*.irx
 *_irx.c
 *.elf
 *.bin
+*.rom0
+*.rom1
+*.rom2
+*.erom
+*.mec
+*.nvm
+
+.vscode/*

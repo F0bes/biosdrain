@@ -11,11 +11,12 @@ intrman_IMPORTS_end
 ioman_IMPORTS_start
 I_open
 I_close
+I_DelDrv
+I_AddDrv
 ioman_IMPORTS_end
 
 sifcmd_IMPORTS_start
 I_sceSifRegisterRpc
-I_sceSifInitRpc
 I_sceSifSetRpcQueue
 I_sceSifRpcLoop
 I_sceSifRemoveRpc
