@@ -11,7 +11,7 @@
 #include <iopcontrol.h>
 #include <unistd.h>
 #include "sysman/sysinfo.h"
-#include "Sysman_rpc.h"
+#include "sysman_rpc.h"
 
 #include "OSDInit.h"
 

@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "sysman/sysinfo.h"
-#include "SYSMAN_rpc.h"
+#include "sysman_rpc.h"
 
 static SifRpcClientData_t SYSMAN_rpc_cd;
 static unsigned char ReceiveBuffer[256] ALIGNED(64);
@@ -34,7 +34,7 @@ void SysmanDeinit(void)
 */
 int SysmanReadMemory(const void *MemoryStart, void *buffer, unsigned int NumBytes, int mode)
 {
-	int RPC_res;
+	int RPC_res = 0;
 
 	((struct MemoryAccessParameters *)TransmitBuffer)->StartAddress = (void *)MemoryStart;
 	((struct MemoryAccessParameters *)TransmitBuffer)->buffer = buffer;
@@ -66,7 +66,7 @@ int SysmanReadMemory(const void *MemoryStart, void *buffer, unsigned int NumByte
 */
 int SysmanWriteMemory(void *MemoryStart, const void *buffer, unsigned int NumBytes, int mode)
 {
-	int RPC_res;
+	int RPC_res = 0;
 
 	((struct MemoryAccessParameters *)TransmitBuffer)->StartAddress = MemoryStart;
 	((struct MemoryAccessParameters *)TransmitBuffer)->buffer = (void *)buffer;
@@ -108,7 +108,7 @@ int SysmanSync(int mode)
 */
 int SysmanCalcROMRegionSize(const void *ROMStart)
 {
-	int RPC_res;
+	int RPC_res = 0;
 
 	*(const void **)TransmitBuffer = ROMStart;
 
@@ -127,7 +127,7 @@ int SysmanCalcROMRegionSize(const void *ROMStart)
 */
 int SysmanCalcROMChipSize(unsigned int RegionSize)
 {
-	int RPC_res;
+	int RPC_res = 0;
 
 	*(unsigned int *)TransmitBuffer = RegionSize;
 
@@ -139,7 +139,7 @@ int SysmanCalcROMChipSize(unsigned int RegionSize)
 
 int SysmanGetHardwareInfo(t_SysmanHardwareInfo *hwinfo)
 {
-	int RPC_res;
+	int RPC_res = 0;
 
 	if ((RPC_res = SifCallRpc(&SYSMAN_rpc_cd, SYSMAN_GetHardwareInfo, 0, NULL, 0, ReceiveBuffer, sizeof(int) + sizeof(t_SysmanHardwareInfo), NULL, NULL)) >= 0)
 	{
@@ -152,7 +152,7 @@ int SysmanGetHardwareInfo(t_SysmanHardwareInfo *hwinfo)
 
 int SysmanGetMACAddress(unsigned char *MAC_address)
 {
-	int RPC_res;
+	int RPC_res = 0;
 
 	if ((RPC_res = SifCallRpc(&SYSMAN_rpc_cd, SYSMAN_GetMACAddress, 0, NULL, 0, ReceiveBuffer, sizeof(int) + 6, NULL, NULL)) >= 0)
 	{
