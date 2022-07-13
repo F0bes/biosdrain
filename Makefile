@@ -1,6 +1,6 @@
-EE_OBJS	= biosdrain.o usbmass_bd_irx.o usbd_irx.o bdm_irx.o bdmfs_vfat_irx.o sysman_irx.o OSDInit.o sysman_rpc.o
+EE_OBJS	= biosdrain.o biosdrain_tex.o usbmass_bd_irx.o usbd_irx.o bdm_irx.o bdmfs_vfat_irx.o sysman_irx.o OSDInit.o sysman_rpc.o
 EE_BIN = biosdrain.elf
-EE_LIBS = -lkernel -lpatches -ldebug -lgraph
+EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -lpacket -ldraw
 EE_CFLAGS = -Werror
 IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
 
@@ -23,6 +23,9 @@ bdm_irx.c: $(PS2SDK)/iop/irx/bdm.irx
 
 bdmfs_vfat_irx.c: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
 	bin2c $< bdmfs_vfat_irx.c bdmfs_vfat_irx
+
+biosdrain_tex.c: biosdrain_tex.tex
+	bin2c $< biosdrain_tex.c biosdrain_tex
 
 clean:
 	$(MAKE) -C sysman clean

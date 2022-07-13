@@ -7,6 +7,11 @@
 #include <libpad.h>
 #include <debug.h>
 #include <graph.h>
+#include <gs_psm.h>
+#include <gs_gp.h>
+#include <draw.h>
+#include <dma.h>
+#include <packet.h>
 #include <iopheap.h>
 #include <iopcontrol.h>
 #include <unistd.h>
@@ -15,9 +20,15 @@
 
 #include "OSDInit.h"
 
+void draw_logo_fast();
+
 #define double_printf(fmt, ...)     \
 	scr_printf(fmt, ##__VA_ARGS__); \
-	printf(fmt, ##__VA_ARGS__);
+	printf(fmt, ##__VA_ARGS__);     \
+	draw_logo_fast();
+
+extern unsigned int size_biosdrain_tex;
+extern unsigned char biosdrain_tex[];
 
 extern unsigned int size_bdm_irx;
 extern unsigned char bdm_irx[];
@@ -158,7 +169,6 @@ void load_irx_usb()
 
 int determine_device()
 {
-
 	// Check host first, can't open just host: on pcsx2, it's broken.
 	if (!mkdir("host:tmp", 0777))
 	{
@@ -189,7 +199,6 @@ int determine_device()
 
 	// To end up here we must've loaded the required USB modules.
 	// Now check for a USB device
-
 	if (!mkdir("mass:tmp", 0777))
 	{
 		rmdir("mass:tmp");
@@ -249,8 +258,10 @@ void dump_rom0()
 
 	fwrite(buffer, 1, 0x400000, file);
 
-	fclose(0);
-	printf("[EE] Finished writing\n");
+	FlushCache(0);
+
+	fclose(file);
+	double_printf("[EE] Finished writing\n");
 	return;
 }
 
@@ -265,8 +276,28 @@ void dump_rom1()
 
 	fwrite(buffer, 1, g_hardwareInfo.ROMs[1].size, file);
 
-	fclose(0);
-	printf("[EE] Finished writing\n");
+	FlushCache(0);
+
+	fclose(file);
+	double_printf("[EE] Finished writing\n");
+	return;
+}
+
+void dump_rom2()
+{
+	dump_area(g_hardwareInfo.ROMs[2].StartAddress, g_hardwareInfo.ROMs[2].size);
+
+	double_printf("[EE] Finished dumping ROM2, writing to file\n");
+
+	FlushCache(0);
+	FILE *file = fopen(get_file_path(FILE_PATH_ROM2), "wb+");
+
+	fwrite(buffer, 1, g_hardwareInfo.ROMs[2].size, file);
+
+	FlushCache(0);
+
+	fclose(file);
+	double_printf("[EE] Finished writing\n");
 	return;
 }
 
@@ -281,16 +312,106 @@ void dump_erom()
 
 	fwrite(buffer, 1, g_hardwareInfo.erom.size, file);
 
-	fclose(0);
-	printf("[EE] Finished writing\n");
+	FlushCache(0);
+
+	fclose(file);
+	double_printf("[EE] Finished writing\n");
 	return;
+}
+
+packet_t *p;
+u32 logo_qword;
+void biosdrain_logo()
+{
+	dma_channel_initialize(DMA_CHANNEL_GIF, NULL, 0);
+	dma_channel_fast_waits(DMA_CHANNEL_GIF);
+	dma_wait_fast();
+	// We rely on debug for drawing text currently, and our framebuffer starts at 0
+	// This should be good enough for now
+	const u32 fixed_texture_address = 0x96000;
+	p = packet_init(270, PACKET_NORMAL);
+	qword_t *q = p->data;
+
+	q = draw_texture_transfer(q, &biosdrain_tex[0], 256, 256, GS_PSM_32, fixed_texture_address, 256);
+	q = draw_texture_flush(q);
+	q = draw_finish(q);
+	dma_channel_send_chain(DMA_CHANNEL_GIF, p->data, q - p->data, 0, 0);
+	dma_wait_fast();
+	// draw_wait_finish();
+
+	packet_free(p);
+	p = packet_init(15, PACKET_NORMAL);
+
+	// Could be optimized ALOT more, but this is fine for now
+	for (int alpha = 0; alpha < 0xFF; alpha++)
+	{
+		q = p->data;
+		{
+			PACK_GIFTAG(q, GIF_SET_TAG(1, 1, GIF_PRE_ENABLE, GS_SET_PRIM(GS_PRIM_SPRITE, 0, 1, 0, 1, 0, 1, 0, 0), GIF_FLG_PACKED, 9),
+						GIF_REG_AD | (GIF_REG_AD << 4) | (GIF_REG_AD << 8) | (GS_REG_TEX0 << 12) | (GIF_REG_RGBAQ << 16) |
+							(GIF_REG_UV << 20) | (GIF_REG_XYZ2 << 24) | (GIF_REG_UV << 28) | ((u64)GIF_REG_XYZ2 << 32));
+			q++;
+			// ALPHA
+			q->dw[0] = GS_SET_ALPHA(0, 2, 0, 2, 0);
+			q->dw[1] = GS_REG_ALPHA;
+			q++;
+			// XYOFFSET
+			q->dw[0] = GS_SET_XYOFFSET(0, 0);
+			q->dw[1] = GS_REG_XYOFFSET;
+			q++;
+			// TEST
+			q->dw[0] = GS_SET_TEST(0, 0, 0, 0, 0, 0, 1, 1);
+			q->dw[1] = GS_REG_TEST;
+			q++;
+			// TEX0
+			q->dw[0] = GS_SET_TEX0(fixed_texture_address / 64, 4, GS_PSM_32, 8, 8, 0, 1, 0, 0, 0, 0, 0);
+			q->dw[1] = GS_REG_TEX0;
+			q++;
+			// RGBAQ
+			q->dw[0] = (u64)((0xFF) | ((u64)0xFF << 32));
+			q->dw[1] = (u64)((0xFF) | ((u64)alpha << 32));
+			q++;
+			// UV
+			q->dw[0] = GS_SET_ST(0, 0);
+			q->dw[1] = (u64)(0);
+			q++;
+			// XYZ2
+			q->dw[0] = (u64)((((300 << 4)) | (((u64)(100 << 4)) << 32)));
+			q->dw[1] = (u64)(0);
+			q++;
+			// UV
+			q->dw[0] = GS_SET_ST(256 << 4, 80 << 4);
+			q->dw[1] = (u64)(0);
+			q++;
+			// XYZ2
+			q->dw[0] = (u64)((((556 << 4)) | (((u64)(180 << 4)) << 32)));
+			q->dw[1] = (u64)(0);
+			q++;
+			q = draw_finish(q);
+
+			logo_qword = q - p->data;
+
+			dma_channel_send_normal(DMA_CHANNEL_GIF, p->data, q - p->data, 0, 0);
+			draw_wait_finish();
+		}
+		graph_wait_vsync();
+	}
+	packet_free(p);
+}
+
+// Hack to work around the fact that when scr_print blits to the screen
+// it clears that entire row of the frame
+void draw_logo_fast()
+{
+	dma_channel_send_normal(DMA_CHANNEL_GIF, p->data, logo_qword, 0, 0);
+	draw_wait_finish();
 }
 
 int main(void)
 {
 	graph_wait_vsync();
 	init_scr();
-
+	biosdrain_logo();
 	printf("[EE] BiosDrain Starting\n");
 	scr_setXY(0, 1);
 	double_printf("[EE] Fobes BiosDrain Starting (beta, might not work right)\n");
@@ -309,6 +430,10 @@ int main(void)
 	if (g_hardwareInfo.ROMs[1].IsExists)
 	{
 		dump_rom1();
+	}
+	if (g_hardwareInfo.ROMs[2].IsExists)
+	{
+		dump_rom2();
 	}
 	if (g_hardwareInfo.erom.IsExists)
 	{

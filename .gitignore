@@ -11,3 +11,5 @@
 *.nvm
 
 .vscode/*
+
+biosdrain_tex.c
