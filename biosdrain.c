@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <stdio.h>
 #include <dirent.h>
 #include <kernel.h>
@@ -167,49 +169,57 @@ void load_irx_usb()
 	}
 };
 
+void reset_iop()
+{
+	SifInitRpc(0);
+	// Reset IOP
+	while (!SifIopReset("", 0x0))
+		;
+	while (!SifIopSync())
+		;
+	SifInitRpc(0);
+
+	sbv_patch_enable_lmb();
+}
+
 int determine_device()
 {
+#ifndef FORCE_USB
 	// Check host first, can't open just host: on pcsx2, it's broken.
 	if (!mkdir("host:tmp", 0777))
 	{
 		rmdir("host:tmp");
 
-		double_printf("[EE] HOST found, will skip IOP reset\n");
+		double_printf("[EE] HOST found.\n");
 
 		use_usb_dir = 0;
-
-		sbv_patch_enable_lmb();
-		return 0;
 	}
 	else
+#endif
 	{
-		SifInitRpc(0);
-
-		// Reset IOP
-		while (!SifIopReset("", 0x80000000))
-			;
-		while (!SifIopSync())
-			;
-
-		SifInitRpc(0);
-
-		sbv_patch_enable_lmb();
-		load_irx_usb();
-	}
-
-	// To end up here we must've loaded the required USB modules.
-	// Now check for a USB device
-	if (!mkdir("mass:tmp", 0777))
-	{
-		rmdir("mass:tmp");
-
-		double_printf("[EE] USB device found.\n");
 		use_usb_dir = 1;
-	}
-	else
-	{
-		double_printf("[EE] USB not found, and host: is not available, not continuing.\n");
-		return 1;
+
+#ifndef NO_RESET_IOP_WHEN_USB
+		reset_iop();
+#else
+		double_printf("[EE] Built to not reset IOP.\n"
+					  "     This is necessary when launched by ulaunchELF!\n"
+					  "     If you are unable to use USB, try a reset build.\n");
+#endif
+		load_irx_usb();
+
+		if (!mkdir("mass:tmp", 0777))
+		{
+			rmdir("mass:tmp");
+
+			double_printf("[EE] USB device found.\n");
+			use_usb_dir = 1;
+		}
+		else
+		{
+			double_printf("[EE] USB not found, and host: is not available, not continuing.\n");
+			return 1;
+		}
 	}
 
 	return 0;
@@ -410,9 +420,14 @@ void draw_logo_fast()
 int main(void)
 {
 	graph_wait_vsync();
+
+	scr_clear();
+
 	init_scr();
+	scr_setCursor(0);
 	biosdrain_logo();
 	printf("[EE] BiosDrain Starting\n");
+
 	scr_setXY(0, 1);
 	double_printf("[EE] Fobes BiosDrain Starting (beta, might not work right)\n");
 	double_printf("[EE] Loading bundled IRX\n");

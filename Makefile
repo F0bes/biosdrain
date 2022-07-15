@@ -1,16 +1,28 @@
-EE_OBJS	= biosdrain.o biosdrain_tex.o usbmass_bd_irx.o usbd_irx.o bdm_irx.o bdmfs_vfat_irx.o sysman_irx.o OSDInit.o sysman_rpc.o
-EE_BIN = biosdrain.elf
+EE_OBJS = biosdrain.o biosdrain_tex.o usbmass_bd_irx.o usbd_irx.o bdm_irx.o
+EE_OBJS += bdmfs_vfat_irx.o sysman_irx.o OSDInit.o sysman_rpc.o
 EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -lpacket -ldraw
 EE_CFLAGS = -Werror
 IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
 
-all: sysman_irx $(EE_BIN)
+ifdef NO_RESET_IOP_WHEN_USB
+EE_BIN = biosdrain-noreset.elf
+EE_CFLAGS += -DNO_RESET_IOP_WHEN_USB
+else
+EE_BIN = biosdrain.elf
+endif
+
+all:
+	$(MAKE) -C . NO_RESET_IOP_WHEN_USB=1 _all
+	rm -f biosdrain.o
+	$(MAKE) -C . _all
+
+_all: sysman_irx $(EE_BIN)
 
 sysman_irx:
 	$(MAKE) -C sysman
 
 sysman_irx.c: sysman/sysman.irx
-	bin2c sysman/sysman.irx sysman_irx.c sysman_irx
+	bin2c $< sysman_irx.c sysman_irx
 
 usbd_irx.c: $(PS2SDK)/iop/irx/usbd.irx
 	bin2c $< usbd_irx.c usbd_irx

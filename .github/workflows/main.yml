@@ -30,6 +30,7 @@ jobs:
         make clean all
         mkdir artifacts
         cp biosdrain.elf artifacts/biosdrain.elf
+        cp biosdrain-noreset.elf artifacts/biosdrain-noreset.elf
     - name: Upload ELF
       uses: actions/upload-artifact@v2
       with: 
