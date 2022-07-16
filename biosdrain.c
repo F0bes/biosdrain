@@ -5,6 +5,7 @@
 #include <kernel.h>
 #include <sbv_patches.h>
 #include <loadfile.h>
+#include <libcdvd.h>
 #include <sifrpc.h>
 #include <libpad.h>
 #include <debug.h>
@@ -329,6 +330,35 @@ void dump_erom()
 	return;
 }
 
+void dump_nvm()
+{
+	u16 nvm_buffer[512];
+
+	u8 result;
+	for (u32 i = 0; i < 512; i++)
+	{
+		if (sceCdReadNVM(i, &nvm_buffer[i], &result) != 1 || result != 0)
+		{
+			double_printf("[EE] Failed to read NVM block %d\n", i);
+			return;
+		}
+	}
+
+	double_printf("[EE] Finished dumping NVM, writing to file\n");
+
+	FlushCache(0);
+	FILE *file = fopen(get_file_path(FILE_PATH_NVM), "wb+");
+
+	fwrite(nvm_buffer, 1, sizeof(nvm_buffer), file);
+
+	FlushCache(0);
+
+	fclose(file);
+
+	double_printf("[EE] Finished writing\n");
+	return;
+}
+
 packet_t *p;
 u32 logo_qword;
 void biosdrain_logo()
@@ -453,6 +483,12 @@ int main(void)
 	if (g_hardwareInfo.erom.IsExists)
 	{
 		dump_erom();
+	}
+	// Haven't looked into where the NVM is stored yet, I'll assume it's
+	// with the DVD stuff as you need to use CDVD commands to read it.
+	if (g_hardwareInfo.DVD_ROM.IsExists)
+	{
+		dump_nvm();
 	}
 
 exit_main:
