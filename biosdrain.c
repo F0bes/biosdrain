@@ -359,6 +359,32 @@ void dump_nvm()
 	return;
 }
 
+void dump_mec()
+{
+
+	u8 mec_version[4];
+	const u32 cmd = 0;
+
+	if (sceCdApplySCmd(0x03, (void *)&cmd, sizeof(cmd), &mec_version[0], sizeof(mec_version)))
+	{
+		double_printf("[EE] Finished dumping MEC, writing to file\n");
+	}
+	else
+	{
+		double_printf("[EE] Failed to read MEC\n");
+		return;
+	}
+
+	FlushCache(0);
+	FILE *file = fopen(get_file_path(FILE_PATH_MEC), "wb+");
+
+	fwrite(mec_version, 1, sizeof(mec_version), file);
+
+	FlushCache(0);
+
+	fclose(file);
+}
+
 packet_t *p;
 u32 logo_qword;
 void biosdrain_logo()
@@ -484,12 +510,14 @@ int main(void)
 	{
 		dump_erom();
 	}
-	// Haven't looked into where the NVM is stored yet, I'll assume it's
+	// Haven't looked into where the NVM / MEC is stored yet, I'll assume it's
 	// with the DVD stuff as you need to use CDVD commands to read it.
 	if (g_hardwareInfo.DVD_ROM.IsExists)
 	{
 		dump_nvm();
+		dump_mec();
 	}
+
 
 exit_main:
 	double_printf("[EE] Finished everything.\n");
