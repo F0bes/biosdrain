@@ -59,22 +59,22 @@ enum FILE_PATH
 
 const char *file_paths_usb[6] =
 	{
-		"mass:BIOS.ROM0",
-		"mass:BIOS.ROM1",
-		"mass:BIOS.ROM2",
-		"mass:BIOS.EROM",
-		"mass:BIOS.MEC",
-		"mass:BIOS.NVM",
+		"mass:BIOS.rom0",
+		"mass:BIOS.rom1",
+		"mass:BIOS.rom2",
+		"mass:BIOS.erom",
+		"mass:BIOS.mec",
+		"mass:BIOS.nvm",
 };
 
 const char *file_paths_host[6] =
 	{
-		"host:BIOS.ROM0",
-		"host:BIOS.ROM1",
-		"host:BIOS.ROM2",
-		"host:BIOS.EROM",
-		"host:BIOS.MEC",
-		"host:BIOS.NVM",
+		"host:BIOS.rom0",
+		"host:BIOS.rom1",
+		"host:BIOS.rom2",
+		"host:BIOS.erom",
+		"host:BIOS.mec",
+		"host:BIOS.nvm",
 };
 
 u32 use_usb_dir = 0;
