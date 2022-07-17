@@ -8,3 +8,9 @@
 
 // Skips resetting the IOP before loading USB driver
 // #define NO_RESET_IOP_WHEN_USB 1
+
+// Simply here to aid intellisense
+// This gets defined in the make file
+#ifndef GIT_VERSION
+	#define GIT_VERSION "unknown"
+#endif

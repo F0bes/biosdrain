@@ -5,7 +5,11 @@ IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.
 EE_OBJS += $(IRX_OBJS)
 
 EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -lpacket -ldraw
-EE_CFLAGS = -Werror
+
+# Git version
+GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
+
+EE_CFLAGS = -I$(shell pwd) -Werror -DGIT_VERSION="\"$(GIT_VERSION)\""
 
 IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
 
