@@ -228,6 +228,7 @@ int determine_device()
 
 void load_irx_sysman()
 {
+	sbv_patch_enable_lmb();
 	sysman_prerequesites();
 	int sysman_irx_id = SifExecModuleBuffer(&sysman_irx, size_sysman_irx, 0, NULL, NULL);
 	printf("SYSMAN ID is %d\n", sysman_irx_id);
