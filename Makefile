@@ -49,7 +49,7 @@ irx/bdmfs_vfat_irx.c: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
 	bin2c $< irx/bdmfs_vfat_irx.c bdmfs_vfat_irx
 
 biosdrain_tex.c: biosdrain_tex.tex
-	bin2c $< irx/biosdrain_tex.c biosdrain_tex
+	bin2c $< biosdrain_tex.c biosdrain_tex
 
 clean:
 	$(MAKE) -C sysman clean
