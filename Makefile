@@ -1,14 +1,22 @@
-EE_OBJS = biosdrain.o biosdrain_tex.o usbmass_bd_irx.o usbd_irx.o bdm_irx.o
-EE_OBJS += bdmfs_vfat_irx.o sysman_irx.o OSDInit.o sysman_rpc.o
+
+EE_OBJS = biosdrain.o biosdrain_tex.o OSDInit.o sysman_rpc.o
+IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.o irx/sysman_irx.o
+# Bin2c objects that will be linked in
+EE_OBJS += $(IRX_OBJS)
+
 EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -lpacket -ldraw
 EE_CFLAGS = -Werror
+
 IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
 
+EE_BIN_RESET = biosdrain.elf
+EE_BIN_NORESET = biosdrain-noreset.elf
+
 ifdef NO_RESET_IOP_WHEN_USB
-EE_BIN = biosdrain-noreset.elf
+EE_BIN = $(EE_BIN_NORESET)
 EE_CFLAGS += -DNO_RESET_IOP_WHEN_USB
 else
-EE_BIN = biosdrain.elf
+EE_BIN = $(EE_BIN_RESET)
 endif
 
 all:
@@ -18,30 +26,31 @@ all:
 
 _all: sysman_irx $(EE_BIN)
 
+# IRX files to be built and or bin2c'd
 sysman_irx:
 	$(MAKE) -C sysman
 
-sysman_irx.c: sysman/sysman.irx
-	bin2c $< sysman_irx.c sysman_irx
+irx/sysman_irx.c: sysman/sysman.irx
+	bin2c $< irx/sysman_irx.c sysman_irx
 
-usbd_irx.c: $(PS2SDK)/iop/irx/usbd.irx
-	bin2c $< usbd_irx.c usbd_irx
+irx/usbd_irx.c: $(PS2SDK)/iop/irx/usbd.irx
+	bin2c $< irx/usbd_irx.c usbd_irx
 
-usbmass_bd_irx.c: $(PS2SDK)/iop/irx/usbmass_bd.irx
-	bin2c $< usbmass_bd_irx.c usbmass_bd_irx
+irx/usbmass_bd_irx.c: $(PS2SDK)/iop/irx/usbmass_bd.irx
+	bin2c $< irx/usbmass_bd_irx.c usbmass_bd_irx
 
-bdm_irx.c: $(PS2SDK)/iop/irx/bdm.irx
-	bin2c $< bdm_irx.c bdm_irx
+irx/bdm_irx.c: $(PS2SDK)/iop/irx/bdm.irx
+	bin2c $< irx/bdm_irx.c bdm_irx
 
-bdmfs_vfat_irx.c: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
-	bin2c $< bdmfs_vfat_irx.c bdmfs_vfat_irx
+irx/bdmfs_vfat_irx.c: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
+	bin2c $< irx/bdmfs_vfat_irx.c bdmfs_vfat_irx
 
 biosdrain_tex.c: biosdrain_tex.tex
-	bin2c $< biosdrain_tex.c biosdrain_tex
+	bin2c $< irx/biosdrain_tex.c biosdrain_tex
 
 clean:
 	$(MAKE) -C sysman clean
-	rm -f $(EE_BIN) $(EE_OBJS) $(IRX_C_FILES)
+	rm -f $(EE_BIN_RESET) $(EE_BIN_NORESET) $(EE_OBJS) $(IRX_C_FILES)
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)

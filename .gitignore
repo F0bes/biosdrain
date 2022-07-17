@@ -1,6 +1,5 @@
 *.o
 *.irx
-*_irx.c
 *.elf
 *.bin
 *.rom0
