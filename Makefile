@@ -3,7 +3,7 @@ EE_OBJS = biosdrain.o biosdrain_tex.o OSDInit.o sysman_rpc.o ui/menu.o dump.o
 IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.o irx/sysman_irx.o
 # Bin2c objects that will be linked in
 EE_OBJS += $(IRX_OBJS)
-EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -lpacket -ldraw
+EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -ldraw
 
 # Git version
 GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"

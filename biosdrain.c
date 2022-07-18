@@ -2,24 +2,15 @@
 #include "ui/menu.h"
 #include "dump.h"
 
-#include <stdio.h>
-#include <dirent.h>
 #include <kernel.h>
+#include <dirent.h> // mkdir()
+#include <unistd.h> // rmdir()
+#include <graph.h> // graph_wait_vsync()
 #include <sbv_patches.h>
 #include <loadfile.h>
-#include <libcdvd.h>
 #include <sifrpc.h>
-#include <libpad.h>
-#include <debug.h>
-#include <graph.h>
-#include <gs_psm.h>
-#include <gs_gp.h>
-#include <draw.h>
-#include <dma.h>
-#include <packet.h>
-#include <iopheap.h>
 #include <iopcontrol.h>
-#include <unistd.h>
+
 #include "sysman/sysinfo.h"
 #include "sysman_rpc.h"
 
