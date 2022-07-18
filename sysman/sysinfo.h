@@ -1,3 +1,4 @@
+#pragma once
 #include "../ps2db.h"
 
 // IOP-side stuff

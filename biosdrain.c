@@ -1,5 +1,6 @@
 #include "config.h"
 #include "ui/menu.h"
+#include "dump.h"
 
 #include <stdio.h>
 #include <dirent.h>
@@ -24,10 +25,6 @@
 
 #include "OSDInit.h"
 
-void draw_logo_fast();
-
-
-
 extern unsigned int size_bdm_irx;
 extern unsigned char bdm_irx[];
 
@@ -42,47 +39,6 @@ extern unsigned char usbd_irx[];
 
 extern unsigned int size_sysman_irx;
 extern unsigned char sysman_irx[];
-
-enum FILE_PATH
-{
-	FILE_PATH_ROM0,
-	FILE_PATH_ROM1,
-	FILE_PATH_ROM2,
-	FILE_PATH_EROM,
-	FILE_PATH_MEC,
-	FILE_PATH_NVM,
-};
-
-const char *file_paths_usb[6] =
-	{
-		"mass:BIOS.rom0",
-		"mass:BIOS.rom1",
-		"mass:BIOS.rom2",
-		"mass:BIOS.erom",
-		"mass:BIOS.mec",
-		"mass:BIOS.nvm",
-};
-
-const char *file_paths_host[6] =
-	{
-		"host:BIOS.rom0",
-		"host:BIOS.rom1",
-		"host:BIOS.rom2",
-		"host:BIOS.erom",
-		"host:BIOS.mec",
-		"host:BIOS.nvm",
-};
-
-u32 use_usb_dir = 0;
-
-// hacked together for now
-const char *get_file_path(int index)
-{
-	if (use_usb_dir)
-		return file_paths_usb[index];
-	else
-		return file_paths_host[index];
-}
 
 void sysman_prerequesites()
 {
@@ -178,6 +134,7 @@ void reset_iop()
 	sbv_patch_enable_lmb();
 }
 
+u32 use_usb_dir = 0;
 int determine_device()
 {
 #ifndef FORCE_USB
@@ -213,11 +170,11 @@ int determine_device()
 		else
 		{
 			menu_status("USB not found, and HOST is not available, not continuing.\n");
-			
+
 #ifdef NO_RESET_IOP_WHEN_USB
 			menu_status("This is a noreset build.\n"
-					  " This is usually necessary for uLaunchELF and USB users.\n"
-					  " Please try the 'regular' biosdrain.elf build.\n");
+						" This is usually necessary for uLaunchELF and USB users.\n"
+						" Please try the 'regular' biosdrain.elf build.\n");
 #endif
 
 			return 1;
@@ -228,7 +185,7 @@ int determine_device()
 }
 
 void load_irx_sysman()
-{	
+{
 	sbv_patch_enable_lmb();
 	sysman_prerequesites();
 	int mod_res;
@@ -238,161 +195,11 @@ void load_irx_sysman()
 	SysmanInit();
 }
 
-static u8 buffer[0x400000] __attribute__((aligned(64)));
-
-void dump_area(u32 start, u32 size)
-{
-	u32 area_ptr = start;
-	u32 buf_ptr = (u32)buffer;
-
-	for (int block = 0; block < (size / MEM_IO_BLOCK_SIZE); block++)
-	{
-		SysmanSync(0);
-		while (SysmanReadMemory((void *)(area_ptr), (void *)(buf_ptr), MEM_IO_BLOCK_SIZE, 1) != 0)
-			nopdelay();
-		area_ptr += MEM_IO_BLOCK_SIZE;
-		buf_ptr += MEM_IO_BLOCK_SIZE;
-	}
-	if ((size % MEM_IO_BLOCK_SIZE) != 0)
-	{
-		SysmanSync(0);
-		while (SysmanReadMemory((void *)(area_ptr), (void *)(buf_ptr), (size % MEM_IO_BLOCK_SIZE), 1) != 0)
-			nopdelay();
-	}
-}
-
-void dump_rom0()
-{
-	dump_area(g_hardwareInfo.ROMs[0].StartAddress, 0x400000);
-
-	menu_status("Finished dumping ROM0, writing to file\n");
-
-	FlushCache(0);
-	FILE *file = fopen(get_file_path(FILE_PATH_ROM0), "wb+");
-
-	fwrite(buffer, 1, 0x400000, file);
-
-	FlushCache(0);
-
-	fclose(file);
-	menu_status("Finished writing\n");
-	return;
-}
-
-void dump_rom1()
-{
-	dump_area(g_hardwareInfo.ROMs[1].StartAddress, g_hardwareInfo.ROMs[1].size);
-
-	menu_status("Finished dumping ROM1, writing to file\n");
-
-	FlushCache(0);
-	FILE *file = fopen(get_file_path(FILE_PATH_ROM1), "wb+");
-
-	fwrite(buffer, 1, g_hardwareInfo.ROMs[1].size, file);
-
-	FlushCache(0);
-
-	fclose(file);
-	menu_status("Finished writing\n");
-	return;
-}
-
-void dump_rom2()
-{
-	dump_area(g_hardwareInfo.ROMs[2].StartAddress, g_hardwareInfo.ROMs[2].size);
-
-	menu_status("Finished dumping ROM2, writing to file\n");
-
-	FlushCache(0);
-	FILE *file = fopen(get_file_path(FILE_PATH_ROM2), "wb+");
-
-	fwrite(buffer, 1, g_hardwareInfo.ROMs[2].size, file);
-
-	FlushCache(0);
-
-	fclose(file);
-	menu_status("Finished writing\n");
-	return;
-}
-
-void dump_erom()
-{
-	dump_area(g_hardwareInfo.erom.StartAddress, g_hardwareInfo.erom.size);
-
-	menu_status("Finished dumping EROM, writing to file\n");
-
-	FlushCache(0);
-	FILE *file = fopen(get_file_path(FILE_PATH_EROM), "wb+");
-
-	fwrite(buffer, 1, g_hardwareInfo.erom.size, file);
-
-	FlushCache(0);
-
-	fclose(file);
-	menu_status("Finished writing\n");
-	return;
-}
-
-void dump_nvm()
-{
-	u16 nvm_buffer[512];
-
-	u8 result;
-	for (u32 i = 0; i < 512; i++)
-	{
-		if (sceCdReadNVM(i, &nvm_buffer[i], &result) != 1 || result != 0)
-		{
-			menu_status("Failed to read NVM block %d\n", i);
-			return;
-		}
-	}
-
-	menu_status("Finished dumping NVM, writing to file\n");
-
-	FlushCache(0);
-	FILE *file = fopen(get_file_path(FILE_PATH_NVM), "wb+");
-
-	fwrite(nvm_buffer, 1, sizeof(nvm_buffer), file);
-
-	FlushCache(0);
-
-	fclose(file);
-
-	menu_status("Finished writing\n");
-	return;
-}
-
-void dump_mec()
-{
-
-	u8 mec_version[4];
-	const u32 cmd = 0;
-
-	if (sceCdApplySCmd(0x03, (void *)&cmd, sizeof(cmd), &mec_version[0], sizeof(mec_version)))
-	{
-		menu_status("Finished dumping MEC, writing to file\n");
-	}
-	else
-	{
-		menu_status("Failed to read MEC\n");
-		return;
-	}
-
-	FlushCache(0);
-	FILE *file = fopen(get_file_path(FILE_PATH_MEC), "wb+");
-
-	fwrite(mec_version, 1, sizeof(mec_version), file);
-
-	FlushCache(0);
-
-	fclose(file);
-}
-
 int main(void)
 {
 	printf("main()\n");
 	menu_init();
-	
+
 	menu_logo_fadein();
 
 	menu_status("Determining target device.\n");
@@ -405,27 +212,9 @@ int main(void)
 
 	LoadSystemInformation();
 
-	dump_rom0();
-	if (g_hardwareInfo.ROMs[1].IsExists)
-	{
-		dump_rom1();
-	}
-	if (g_hardwareInfo.ROMs[2].IsExists)
-	{
-		dump_rom2();
-	}
-	if (g_hardwareInfo.erom.IsExists)
-	{
-		dump_erom();
-	}
-	// Haven't looked into where the NVM / MEC is stored yet, I'll assume it's
-	// with the DVD stuff as you need to use CDVD commands to read it.
-	if (g_hardwareInfo.DVD_ROM.IsExists)
-	{
-		dump_nvm();
-		dump_mec();
-	}
+	dump_init(use_usb_dir);
 
+	dump_exec();
 
 exit_main:
 	menu_status("Finished everything.\n");
