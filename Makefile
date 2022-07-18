@@ -1,4 +1,4 @@
-# This file is an international crime
+EE_BIN ?= biosdrain.elf
 EE_OBJS = biosdrain.o biosdrain_tex.o OSDInit.o sysman_rpc.o ui/menu.o dump.o
 IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.o irx/sysman_irx.o
 # Bin2c objects that will be linked in
@@ -12,22 +12,11 @@ EE_CFLAGS = -I$(shell pwd) -Werror -DGIT_VERSION="\"$(GIT_VERSION)\""
 
 IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
 
-EE_BIN_RESET = biosdrain.elf
-EE_BIN_NORESET = biosdrain-noreset.elf
-
 ifdef NO_RESET_IOP_WHEN_USB
-EE_BIN = $(EE_BIN_NORESET)
 EE_CFLAGS += -DNO_RESET_IOP_WHEN_USB
-else
-EE_BIN = $(EE_BIN_RESET)
 endif
 
-all:
-	$(MAKE) -C . NO_RESET_IOP_WHEN_USB=1 _all
-	rm -f biosdrain.o
-	$(MAKE) -C . _all
-
-_all: sysman_irx $(EE_BIN)
+all: sysman_irx $(EE_BIN)
 
 # IRX files to be built and or bin2c'd
 sysman_irx:

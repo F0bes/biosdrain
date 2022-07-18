@@ -7,7 +7,7 @@ on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,22 +18,35 @@ jobs:
     runs-on: ubuntu-latest
     container: ps2dev/ps2dev:latest
     steps:
-    - name: Install dependencies
-      run: |
-        apk add build-base git bash
-    - uses: actions/checkout@v2
-    - run: |
-        git config --global --add safe.directory /__w/biosdrain/biosdrain
-        git fetch --prune --unshallow
-    - name: Compile project
-      run: |
-        make clean all
-        mkdir artifacts
-        cp biosdrain.elf artifacts/biosdrain.elf
-        cp biosdrain-noreset.elf artifacts/biosdrain-noreset.elf
-    - name: Upload ELF
-      uses: actions/upload-artifact@v2
-      with: 
-        name: biosdrain
-        path: artifacts
+      - name: Install dependencies
+        run: |
+          apk add build-base git bash
 
+      - uses: actions/checkout@v2
+      - run: |
+          git config --global --add safe.directory /__w/biosdrain/biosdrain
+          git fetch --prune --unshallow
+
+      - name: Increment our release
+        uses: aurestic/incrementarl-create-release@master
+        with:
+          flag_branch: false
+          message: Bump version
+          prev_tag: "v"
+          update_odoo_module_version: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile project
+        run: |
+          make clean all
+          make clean all NO_RESET_IOP_WHEN_USB=1 EE_BIN=biosdrain-noreset.elf
+          mkdir artifacts
+          cp biosdrain.elf artifacts/biosdrain.elf
+          cp biosdrain-noreset.elf artifacts/biosdrain-noreset.elf
+
+      - name: Upload ELF
+        uses: actions/upload-artifact@v2
+        with:
+          name: biosdrain
+          path: artifacts
