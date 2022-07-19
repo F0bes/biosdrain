@@ -101,8 +101,8 @@ void dump_exec()
 		if (dump_jobs[i].enabled)
 		{
 			menu_status("Dumping %s...", dump_jobs[i].dump_name);
-			u32 ret = 0;
-			if (!(ret = dump_jobs[i].dump_func()))
+			u32 ret = dump_jobs[i].dump_func();
+			if (!ret)
 			{
 				FlushCache(0);
 				menu_status("Writing to file...");
@@ -167,10 +167,11 @@ static u32 dump_nvm_func()
 	u8 result;
 	for (u32 i = 0; i < 512; i++)
 	{
-		if (sceCdReadNVM(i, (u16 *)dump_shared_buffer, &result) != 1 || result != 0)
+		if (sceCdReadNVM(i, (u16 *)dump_shared_buffer + i, &result) != 1 || result != 0)
 		{
 			return result;
 		}
+		
 	}
 	return 0;
 }
