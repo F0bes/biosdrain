@@ -6,8 +6,8 @@ name: Build
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-  pull_request:
-    branches: [master]
+    branches:
+      - "master"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -17,6 +17,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: ps2dev/ps2dev:latest
+    permissions:
+      contents: write
     steps:
       - name: Install dependencies
         run: |
@@ -27,16 +29,6 @@ jobs:
           git config --global --add safe.directory /__w/biosdrain/biosdrain
           git fetch --prune --unshallow
 
-      - name: Increment our release
-        uses: aurestic/incrementarl-create-release@master
-        with:
-          flag_branch: false
-          message: Bump version
-          prev_tag: "v"
-          update_odoo_module_version: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Compile project
         run: |
           make clean all
@@ -44,6 +36,22 @@ jobs:
           mkdir artifacts
           cp biosdrain.elf artifacts/biosdrain.elf
           cp biosdrain-noreset.elf artifacts/biosdrain-noreset.elf
+
+      - name: Increment our tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: steps.tag_version.outputs.new_tag
+        with:
+          prerelease: true
+          files: |
+            artifacts/biosdrain.elf
+            artifacts/biosdrain-noreset.elf
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
 
       - name: Upload ELF
         uses: actions/upload-artifact@v2
