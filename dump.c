@@ -181,6 +181,6 @@ static u32 dump_mec_func()
 	// inBuff[0] 0x00: Read MEC version
 	// Mechacon version is only 4 bytes long
 
-	const u16 cmd = 0;
-	return !sceCdApplySCmd(0x03, (void *)&cmd, sizeof(cmd), (void *)dump_shared_buffer, 4);
+	u32 _unused;
+	return !sceCdMV((u8*)dump_shared_buffer, &_unused);
 }
