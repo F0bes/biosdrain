@@ -12,10 +12,6 @@ EE_CFLAGS = -I$(shell pwd) -Werror -DGIT_VERSION="\"$(GIT_VERSION)\""
 
 IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
 
-ifdef NO_RESET_IOP_WHEN_USB
-EE_CFLAGS += -DNO_RESET_IOP_WHEN_USB
-endif
-
 all: sysman_irx $(EE_BIN)
 
 # IRX files to be built and or bin2c'd

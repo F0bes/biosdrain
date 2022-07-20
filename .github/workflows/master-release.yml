@@ -24,24 +24,22 @@ jobs:
         run: |
           apk add build-base git bash
 
-      - uses: actions/checkout@v2
-      - run: |
-          git config --global --add safe.directory /__w/biosdrain/biosdrain
-          git fetch --prune --unshallow
-
       - name: Increment our tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: actions/checkout@v2
+      - run: |
+          git config --global --add safe.directory /__w/biosdrain/biosdrain
+          git fetch --prune --unshallow
+
       - name: Compile project
         run: |
           make clean all
-          make clean all NO_RESET_IOP_WHEN_USB=1 EE_BIN=biosdrain-noreset.elf
           mkdir artifacts
           cp biosdrain.elf artifacts/biosdrain.elf
-          cp biosdrain-noreset.elf artifacts/biosdrain-noreset.elf
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -50,7 +48,6 @@ jobs:
           prerelease: true
           files: |
             artifacts/biosdrain.elf
-            artifacts/biosdrain-noreset.elf
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
 
       - name: Upload ELF
