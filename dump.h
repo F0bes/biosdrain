@@ -21,3 +21,4 @@ typedef struct
 
 void dump_init(u32 use_usb);
 void dump_exec();
+void dump_cleanup();

@@ -4,6 +4,7 @@
 
 #include <libcdvd.h>
 #include <kernel.h>
+#include <stdlib.h>
 
 #include "sysman/sysinfo.h" // t_SysmanHardwareInfo
 #include "sysman_rpc.h"
@@ -15,7 +16,7 @@ static u32 dump_erom_func();
 static u32 dump_nvm_func();
 static u32 dump_mec_func();
 
-static u8 dump_shared_buffer[0x400000];
+static u8* dump_shared_buffer;
 
 extern t_SysmanHardwareInfo g_hardwareInfo;
 
@@ -42,6 +43,7 @@ static u32 dump_file(t_dump job)
 
 void dump_init(u32 use_usb)
 {
+	dump_shared_buffer = (u8*) aligned_alloc(64, 0x400000);
 	dump_file_usb = use_usb;
 
 	// ROM0
@@ -117,6 +119,11 @@ void dump_exec()
 	}
 }
 
+void dump_cleanup()
+{
+	free(dump_shared_buffer);
+}
+
 // Used for ROMx and EROM dumps
 // Pretty much just a SysmanReadMemory wrapper
 static void common_dump_func(u32 start, u32 size)
@@ -182,5 +189,5 @@ static u32 dump_mec_func()
 	// Mechacon version is only 4 bytes long
 
 	u32 _unused;
-	return !sceCdMV((u8*)dump_shared_buffer, &_unused);
+	return !sceCdMV(dump_shared_buffer, &_unused);
 }

@@ -206,7 +206,7 @@ int main(void)
 	dump_init(use_usb_dir);
 
 	dump_exec();
-
+	dump_cleanup();
 exit_main:
 	menu_status("Finished everything.\n");
 	SleepThread();
