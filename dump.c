@@ -6,6 +6,7 @@
 #include <kernel.h>
 #include <stdlib.h>
 
+#include "modelname.h"
 #include "sysman/sysinfo.h" // t_SysmanHardwareInfo
 #include "sysman_rpc.h"
 
@@ -22,11 +23,13 @@ extern t_SysmanHardwareInfo g_hardwareInfo;
 
 static t_dump dump_jobs[6];
 
+static char dump_filename[MODEL_NAME_MAX_LEN];
+
 static u32 dump_file_usb = 0;
 static u32 dump_file(t_dump job)
 {
 	char path[256];
-	sprintf(path, "%s%s", dump_file_usb ? "mass:" : "host:", job.dump_fname);
+	sprintf(path, "%s%s.%s", dump_file_usb ? "mass:" : "host:", dump_filename, job.dump_fext);
 
 	FILE *f = fopen(path, "wb+");
 	if (!f)
@@ -49,7 +52,7 @@ void dump_init(u32 use_usb)
 	// ROM0
 	{
 		dump_jobs[0].dump_name = "ROM0";
-		dump_jobs[0].dump_fname = "BIOS.rom0";
+		dump_jobs[0].dump_fext = "rom0";
 		dump_jobs[0].dump_func = dump_rom0_func;
 		dump_jobs[0].dump_size = 0x400000;
 		dump_jobs[0].enabled = g_hardwareInfo.ROMs[0].IsExists;
@@ -57,7 +60,7 @@ void dump_init(u32 use_usb)
 	// ROM1
 	{
 		dump_jobs[1].dump_name = "ROM1";
-		dump_jobs[1].dump_fname = "BIOS.rom1";
+		dump_jobs[1].dump_fext = "rom1";
 		dump_jobs[1].dump_func = dump_rom1_func;
 		dump_jobs[1].dump_size = g_hardwareInfo.ROMs[1].size;
 		dump_jobs[1].enabled = g_hardwareInfo.ROMs[1].IsExists;
@@ -65,7 +68,7 @@ void dump_init(u32 use_usb)
 	// ROM2
 	{
 		dump_jobs[2].dump_name = "ROM2";
-		dump_jobs[2].dump_fname = "BIOS.rom2";
+		dump_jobs[2].dump_fext = "rom2";
 		dump_jobs[2].dump_func = dump_rom2_func;
 		dump_jobs[2].dump_size = g_hardwareInfo.ROMs[2].size;
 		dump_jobs[2].enabled = g_hardwareInfo.ROMs[2].IsExists;
@@ -73,7 +76,7 @@ void dump_init(u32 use_usb)
 	// EROM
 	{
 		dump_jobs[3].dump_name = "EROM";
-		dump_jobs[3].dump_fname = "BIOS.erom";
+		dump_jobs[3].dump_fext = "erom";
 		dump_jobs[3].dump_func = dump_erom_func;
 		dump_jobs[3].dump_size = g_hardwareInfo.erom.size;
 		dump_jobs[3].enabled = g_hardwareInfo.erom.IsExists;
@@ -81,7 +84,7 @@ void dump_init(u32 use_usb)
 	// NVM
 	{
 		dump_jobs[4].dump_name = "NVM";
-		dump_jobs[4].dump_fname = "BIOS.nvm";
+		dump_jobs[4].dump_fext = "nvm";
 		dump_jobs[4].dump_func = dump_nvm_func;
 		dump_jobs[4].dump_size = 1024;
 		dump_jobs[4].enabled = g_hardwareInfo.DVD_ROM.IsExists;
@@ -89,11 +92,14 @@ void dump_init(u32 use_usb)
 	// MEC
 	{
 		dump_jobs[5].dump_name = "MEC";
-		dump_jobs[5].dump_fname = "BIOS.mec";
+		dump_jobs[5].dump_fext = "mec";
 		dump_jobs[5].dump_func = dump_mec_func;
 		dump_jobs[5].dump_size = 4;
 		dump_jobs[5].enabled = g_hardwareInfo.DVD_ROM.IsExists;
 	}
+
+	if(modelname_read(dump_filename) != 0)
+		menu_status("Warning: Unable to get the model name\nFile name will be set to 'Unknown'\n");
 }
 
 void dump_exec()
