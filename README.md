@@ -22,7 +22,7 @@ Simply download the files (if you've used a USB drive) back to your computer, an
 
 <br/>
 
-## **I politely ask that you do not share these files!**
+## **I politely ask that you do not share your BIOS files!**
 
 <br/>
 
