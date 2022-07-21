@@ -29,9 +29,11 @@ Simply download the files (if you've used a USB drive) back to your computer, an
 If the path to your bios was `D:\ps2bios\dump` you'd see one of the below.
 
 **WX**
+
 ![image](https://user-images.githubusercontent.com/29295048/180281013-7e142c3a-2762-4987-885f-27d622029d64.png)
 
 **QT**
+
 ![image](https://user-images.githubusercontent.com/29295048/180281541-a402877c-c8b7-4eea-9e36-710d3f48b0e2.png)
 
 
