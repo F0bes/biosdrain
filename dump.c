@@ -62,7 +62,7 @@ void dump_init(u32 use_usb)
 		dump_jobs[1].dump_name = "ROM1";
 		dump_jobs[1].dump_fext = "rom1";
 		dump_jobs[1].dump_func = dump_rom1_func;
-		dump_jobs[1].dump_size = g_hardwareInfo.ROMs[1].size;
+		dump_jobs[1].dump_size = 0x80000;
 		dump_jobs[1].enabled = g_hardwareInfo.ROMs[1].IsExists;
 	}
 	// ROM2
@@ -70,8 +70,8 @@ void dump_init(u32 use_usb)
 		dump_jobs[2].dump_name = "ROM2";
 		dump_jobs[2].dump_fext = "rom2";
 		dump_jobs[2].dump_func = dump_rom2_func;
-		dump_jobs[2].dump_size = g_hardwareInfo.ROMs[2].size;
-		dump_jobs[2].enabled = g_hardwareInfo.ROMs[2].IsExists;
+		dump_jobs[2].dump_size = 0x80000;
+		dump_jobs[2].enabled = g_hardwareInfo.ROMs[1].IsExists;
 	}
 	// EROM
 	{
@@ -159,12 +159,12 @@ static u32 dump_rom0_func()
 }
 static u32 dump_rom1_func()
 {
-	common_dump_func(g_hardwareInfo.ROMs[1].StartAddress, g_hardwareInfo.ROMs[1].size);
+	common_dump_func(g_hardwareInfo.ROMs[1].StartAddress, 0x80000);
 	return 0;
 }
 static u32 dump_rom2_func()
 {
-	common_dump_func(g_hardwareInfo.ROMs[2].StartAddress, g_hardwareInfo.ROMs[2].size);
+	common_dump_func(g_hardwareInfo.ROMs[2].StartAddress, 0x80000);
 	return 0;
 }
 static u32 dump_erom_func()

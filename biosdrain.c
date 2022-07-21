@@ -53,7 +53,6 @@ t_SysmanHardwareInfo g_hardwareInfo;
 void LoadSystemInformation()
 {
 	SysmanGetHardwareInfo(&g_hardwareInfo);
-
 	menu_status("BOOT ROM Info:\n");
 	menu_status("- ROM0 exists? %s\n", g_hardwareInfo.ROMs[0].IsExists ? "Yes" : "No");
 	if (g_hardwareInfo.ROMs[0].IsExists)
