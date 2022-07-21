@@ -134,8 +134,9 @@ int ROMGetHardwareInfo(t_SysmanHardwareInfo *hwinfo)
 	}
 
 	// rom2 (part of DEV1)
+	// fobes: continuing this hack, but for ROM2
+	romAddDevice(2, (void*)0x1E400000);
 	pImgStat = romGetDevice(2);
-	printf("romGetDevice(%d) = %p\n", 2, pImgStat);
 	if (pImgStat != NULL)
 	{
 		hwinfo->ROMs[2].IsExists = 1;
