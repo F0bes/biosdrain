@@ -38,8 +38,8 @@ jobs:
       - name: Compile project
         run: |
           make clean all
-          mkdir artifacts
-          cp biosdrain.elf artifacts/biosdrain.elf
+          mkdir binaries
+          cp biosdrain.elf binaries/biosdrain.elf
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -47,11 +47,6 @@ jobs:
         with:
           prerelease: true
           files: |
-            artifacts/biosdrain.elf
+            binaries/biosdrain.elf
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
 
-      - name: Upload ELF
-        uses: actions/upload-artifact@v2
-        with:
-          name: biosdrain
-          path: artifacts
