@@ -31,11 +31,3 @@ jobs:
       - name: Compile project
         run: |
           make clean all
-          mkdir artifacts
-          cp biosdrain.elf artifacts/biosdrain.elf
-
-      - name: Upload ELF
-        uses: actions/upload-artifact@v2
-        with:
-          name: biosdrain
-          path: artifacts
