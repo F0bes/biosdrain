@@ -2,9 +2,10 @@
 
 #include "ui/menu.h"
 
-#include <libcdvd.h>
 #include <kernel.h>
+#include <libcdvd.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "modelname.h"
 #include "sysman/sysinfo.h" // t_SysmanHardwareInfo

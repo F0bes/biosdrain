@@ -3,6 +3,7 @@
 #include "dump.h"
 
 #include <kernel.h>
+#include <stdio.h>
 #include <dirent.h> // mkdir()
 #include <unistd.h> // rmdir()
 #include <graph.h> // graph_wait_vsync()
@@ -188,8 +189,9 @@ void load_irx_sysman()
 int main(void)
 {
 	printf("main()\n");
-	menu_init();
 
+	graphic_init();
+	menu_init();
 	menu_logo_fadein();
 
 	menu_status("Determining target device.\n");
