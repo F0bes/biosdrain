@@ -46,6 +46,7 @@ jobs:
         if: steps.tag_version.outputs.new_tag
         with:
           prerelease: true
+          generate_release_notes: true
           files: |
             binaries/biosdrain.elf
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
