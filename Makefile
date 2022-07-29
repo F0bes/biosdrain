@@ -1,9 +1,12 @@
 EE_BIN ?= biosdrain.elf
 EE_OBJS = biosdrain.o biosdrain_tex.o OSDInit.o sysman_rpc.o ui/menu.o dump.o modelname.o
+EE_OBJS += ui/graphic.o ui/graphic_vu.o ui/tex/bongo_tex_1.o ui/tex/bongo_tex_2.o
 IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.o irx/sysman_irx.o
 # Bin2c objects that will be linked in
 EE_OBJS += $(IRX_OBJS)
 EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -ldraw
+
+EE_DVP = dvp-as
 
 # Git version
 GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
@@ -35,6 +38,15 @@ irx/bdmfs_vfat_irx.c: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
 
 biosdrain_tex.c: biosdrain_tex.tex
 	bin2c $< biosdrain_tex.c biosdrain_tex
+
+ui/tex/bongo_tex_1.c: ui/tex/bongo_tex_1.tex
+	bin2c $< ui/tex/bongo_tex_1.c bongo_tex_1
+
+ui/tex/bongo_tex_2.c: ui/tex/bongo_tex_2.tex
+	bin2c $< ui/tex/bongo_tex_2.c bongo_tex_2
+
+%.o: %.vsm
+	$(EE_DVP) $< -o $@
 
 clean:
 	$(MAKE) -C sysman clean
