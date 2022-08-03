@@ -6,17 +6,27 @@
 # VI1 is the current tex0 index
 graphic_vu_start:
 
+# VI06 is used to count our current frames
+NOP						IADDIU VI06, VI00, 0
+# VI05 is how many frames to wait before incrementing
+NOP						IADDIU VI05, VI00, 7
 # VI04 is where we xgkick
 NOP 					IADDIU VI04, VI00, 2
 # VI02 is the max texture frames (The point where VI01 resets)
 NOP						IADDI VI03, VI00, 2
 # VI02 is where TEX0 is in our kicked GIF packet
-NOP						IADDI VI02, VI00, 3
+NOP						IADDI VI02, VI00, 9
 # VI01 is used as an index
-NOP						IADDI VI01, VI01, 0
+NOP						IADDI VI01, VI00, 0
+NOP						LQ.xyzw VF03, 0(VI01)
+NOP						SQ.xyzw VF03, 0(VI02)
 
 graphic_vu_cont:
-
+NOP						IADDIU VI06, VI06, 1
+NOP						NOP
+NOP						IBNE VI05, VI06, skip_increment
+NOP						NOP
+NOP						IADDIU VI06, VI00, 0
 # Copy our desired TEX0 to the one in our packet
 NOP						LQ.xyzw VF03, 0(VI01)
 NOP						SQ.xyzw VF03, 0(VI02)
@@ -27,6 +37,7 @@ NOP  					NOP
 NOP						IBNE VI01, VI03, index_dont_reset
 NOP						NOP
 NOP						IADDI VI01, VI00, 0
+skip_increment:
 index_dont_reset:
 # Kick off our packet
 NOP						xgkick VI04

@@ -1,6 +1,7 @@
 EE_BIN ?= biosdrain.elf
-EE_OBJS = biosdrain.o biosdrain_tex.o OSDInit.o sysman_rpc.o ui/menu.o dump.o modelname.o
-EE_OBJS += ui/graphic.o ui/graphic_vu.o ui/tex/bongo_tex_1.o ui/tex/bongo_tex_2.o
+EE_OBJS = biosdrain.o OSDInit.o sysman_rpc.o ui/menu.o dump.o modelname.o
+EE_OBJS += ui/fontqueue.o ui/tex/font/font_tex.o ui/tex/font/font_pallete_tex.o ui/fontengine.o
+EE_OBJS += ui/graphic.o ui/graphic_vu.o ui/tex/bongo_tex_1.o ui/tex/bongo_tex_2.o ui/tex/biosdrain_tex.o
 IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.o irx/sysman_irx.o
 # Bin2c objects that will be linked in
 EE_OBJS += $(IRX_OBJS)
@@ -9,7 +10,7 @@ EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -ldraw
 EE_DVP = dvp-as
 
 # Git version
-GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
+GIT_VERSION := "$(shell git describe --abbrev=4 --always --tags)"
 
 EE_CFLAGS = -I$(shell pwd) -Werror -DGIT_VERSION="\"$(GIT_VERSION)\""
 
@@ -36,14 +37,20 @@ irx/bdm_irx.c: $(PS2SDK)/iop/irx/bdm.irx
 irx/bdmfs_vfat_irx.c: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
 	bin2c $< irx/bdmfs_vfat_irx.c bdmfs_vfat_irx
 
-biosdrain_tex.c: biosdrain_tex.tex
-	bin2c $< biosdrain_tex.c biosdrain_tex
+ui/tex/biosdrain_tex.c: ui/tex/biosdrain_tex.raw
+	bin2c $< ui/tex/biosdrain_tex.c biosdrain_tex
 
-ui/tex/bongo_tex_1.c: ui/tex/bongo_tex_1.tex
+ui/tex/bongo_tex_1.c: ui/tex/bongo_tex_1.raw
 	bin2c $< ui/tex/bongo_tex_1.c bongo_tex_1
 
-ui/tex/bongo_tex_2.c: ui/tex/bongo_tex_2.tex
+ui/tex/bongo_tex_2.c: ui/tex/bongo_tex_2.raw
 	bin2c $< ui/tex/bongo_tex_2.c bongo_tex_2
+
+ui/tex/font/font_tex.c: ui/tex/font/font_tex.raw
+	bin2c $< ui/tex/font/font_tex.c font_tex
+
+ui/tex/font/font_pallete_tex.c: ui/tex/font/font_pallete_tex.raw
+	bin2c $< ui/tex/font/font_pallete_tex.c font_pallete_tex
 
 %.o: %.vsm
 	$(EE_DVP) $< -o $@

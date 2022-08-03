@@ -1,12 +1,16 @@
 #include "config.h"
 #include "ui/menu.h"
+#include "ui/fontqueue.h"
+#include "ui/fontengine.h"
 #include "dump.h"
 
 #include <kernel.h>
 #include <stdio.h>
+#include <sio.h>
+#include <stdlib.h>
 #include <dirent.h> // mkdir()
 #include <unistd.h> // rmdir()
-#include <graph.h> // graph_wait_vsync()
+#include <graph.h>	// graph_wait_vsync()
 #include <sbv_patches.h>
 #include <loadfile.h>
 #include <sifrpc.h>
@@ -54,37 +58,35 @@ t_SysmanHardwareInfo g_hardwareInfo;
 void LoadSystemInformation()
 {
 	SysmanGetHardwareInfo(&g_hardwareInfo);
-	menu_status("BOOT ROM Info:\n");
-	menu_status("- ROM0 exists? %s\n", g_hardwareInfo.ROMs[0].IsExists ? "Yes" : "No");
+	menu_status("- ROM0 exists? %s", g_hardwareInfo.ROMs[0].IsExists ? "Yes" : "No");
 	if (g_hardwareInfo.ROMs[0].IsExists)
 	{
-		menu_status("- ROM0 ADDR and SIZE: %08X %08X \n", g_hardwareInfo.ROMs[0].StartAddress, g_hardwareInfo.ROMs[0].size);
+		menu_status("- ROM0 ADDR and SIZE: %08X %08X", g_hardwareInfo.ROMs[0].StartAddress, g_hardwareInfo.ROMs[0].size);
 	}
 
-	menu_status("DVD ROM Info:\n");
-	menu_status("- DVD exists? %s\n", g_hardwareInfo.DVD_ROM.IsExists ? "Yes" : "No");
-	menu_status("- ROM1 exists? %s\n", g_hardwareInfo.ROMs[1].IsExists ? "Yes" : "No");
-	menu_status("- EROM exists? %s\n", g_hardwareInfo.erom.IsExists ? "Yes" : "No");
-	menu_status("- ROM2 exists? %s\n", g_hardwareInfo.ROMs[2].IsExists ? "Yes" : "No");
+	menu_status("- DVD exists? %s", g_hardwareInfo.DVD_ROM.IsExists ? "Yes" : "No");
+	menu_status("- ROM1 exists? %s", g_hardwareInfo.ROMs[1].IsExists ? "Yes" : "No");
+	menu_status("- EROM exists? %s", g_hardwareInfo.erom.IsExists ? "Yes" : "No");
+	menu_status("- ROM2 exists? %s", g_hardwareInfo.ROMs[2].IsExists ? "Yes" : "No");
 
 	if (g_hardwareInfo.DVD_ROM.IsExists)
 	{
-		menu_status("- DVD ADDR and SIZE: %08X %08X \n", g_hardwareInfo.DVD_ROM.StartAddress, g_hardwareInfo.DVD_ROM.size);
+		menu_status("- DVD ADDR and SIZE: %08X %08X", g_hardwareInfo.DVD_ROM.StartAddress, g_hardwareInfo.DVD_ROM.size);
 	}
 	if (g_hardwareInfo.ROMs[1].IsExists)
 	{
-		menu_status(" - ROM1 ADDR and SIZE: %08X %08X\n", g_hardwareInfo.ROMs[1].StartAddress, g_hardwareInfo.ROMs[1].size);
+		menu_status(" - ROM1 ADDR and SIZE: %08X %08X", g_hardwareInfo.ROMs[1].StartAddress, g_hardwareInfo.ROMs[1].size);
 	}
 	if (g_hardwareInfo.erom.IsExists)
 	{
 		// Uses GetLoadcoreInternalData() to get the address of the encrypted module
 		// Turn 0xBE040000 -> 0x1E040000
 		g_hardwareInfo.erom.StartAddress &= ~(0xA << 0x1C);
-		menu_status(" - EROM ADDR and SIZE: %08X %08X\n", g_hardwareInfo.erom.StartAddress, g_hardwareInfo.erom.size);
+		menu_status(" - EROM ADDR and SIZE: %08X %08X", g_hardwareInfo.erom.StartAddress, g_hardwareInfo.erom.size);
 	}
 	if (g_hardwareInfo.ROMs[2].IsExists)
 	{
-		menu_status(" - ROM2 ADDR and SIZE: %08X %08X\n", g_hardwareInfo.ROMs[2].StartAddress, g_hardwareInfo.ROMs[2].size);
+		menu_status(" - ROM2 ADDR and SIZE: %08X %08X", g_hardwareInfo.ROMs[2].StartAddress, g_hardwareInfo.ROMs[2].size);
 	}
 }
 
@@ -133,9 +135,6 @@ int determine_device()
 	if (!mkdir("host:tmp", 0777))
 	{
 		rmdir("host:tmp");
-
-		menu_status("HOST found.\n");
-
 		use_usb_dir = 0;
 	}
 	else
@@ -148,26 +147,21 @@ int determine_device()
 #ifndef NO_RESET_IOP_WHEN_USB
 		reset_iop();
 #endif
-
 		load_irx_usb();
 
 		if (!mkdir("mass:tmp", 0777))
 		{
 			rmdir("mass:tmp");
-
-			menu_status("USB device found.\n");
 			use_usb_dir = 1;
 		}
 		else
 		{
-			menu_status("USB not found, and HOST is not available, not continuing.\n");
-
+			menu_status("USB not found, and HOST is not available, not continuing.");
 #ifdef NO_RESET_IOP_WHEN_USB
-			menu_status("This is a noreset build.\n"
-						" This is usually necessary for uLaunchELF and USB users.\n"
-						" Please try the 'regular' biosdrain.elf build.\n");
+			menu_status("This is a noreset build.");
+			menu_status("This is usually necessary for uLaunchELF and USB users.");
+			menu_status("Please try the 'regular' biosdrain.elf build.");
 #endif
-
 			return 1;
 		}
 	}
@@ -188,19 +182,20 @@ void load_irx_sysman()
 
 int main(void)
 {
-	printf("main()\n");
+	sio_puts("main()\n");
 
-	graphic_init();
 	menu_init();
-	menu_logo_fadein();
+	graphic_init();
+	fontengine_init();
+	graphic_biosdrain_fadein();
 
-	menu_status("Determining target device.\n");
+	menu_status("biosdrain - revision %s", GIT_VERSION);
 	if (determine_device())
 		goto exit_main;
 
 	load_irx_sysman();
 
-	menu_status("Dumping ROM\n");
+	menu_status("Dumping to %s", use_usb_dir ? "USB" : "HOST");
 
 	LoadSystemInformation();
 
@@ -209,6 +204,6 @@ int main(void)
 	dump_exec();
 	dump_cleanup();
 exit_main:
-	menu_status("Finished everything.\n");
+	menu_status("Finished everything.");
 	SleepThread();
 }
