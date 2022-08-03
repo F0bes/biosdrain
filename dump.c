@@ -116,11 +116,11 @@ void dump_exec()
 				FlushCache(0);
 				menu_status("Writing to file...");
 				dump_file(dump_jobs[i]);
-				menu_status("Finished");
+				menu_status("Finished\n");
 			}
 			else
 			{
-				menu_status("Dump failed, result %d", ret);
+				menu_status("Dump failed, result %d\n", ret);
 			}
 		}
 	}
