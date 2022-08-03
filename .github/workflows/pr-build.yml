@@ -1,14 +1,8 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Build Pull Request
 
-# Controls when the workflow will run
 on:
   pull_request:
     branches: [master]
-  push:
-    branches-ignore:
-      - "master"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,3 +25,11 @@ jobs:
       - name: Compile project
         run: |
           make clean all
+          mkdir artifacts
+          cp biosdrain.elf artifacts/biosdrain.elf
+
+      - name: Upload ELF
+        uses: actions/upload-artifact@v2
+        with:
+          name: biosdrain
+          path: artifacts
