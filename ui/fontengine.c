@@ -29,8 +29,8 @@ void fontengine_init(void)
 	// Our framebuffer is CT24, the high 8 bits can be used for our 8H indexed texture
 	font_indexed_addr = g_fb.address;
 	font_pallete_addr = graph_vram_allocate(16, 16, GS_PSM_32, GRAPH_ALIGN_BLOCK);
-	qword_t *gif_packet = (qword_t *)aligned_alloc(64, sizeof(qword_t) * 2048);
-	qword_t *q = gif_packet;
+	qword_t* gif_packet = (qword_t*)aligned_alloc(64, sizeof(qword_t) * 2048);
+	qword_t* q = gif_packet;
 
 	q = gif_packet;
 	q = draw_texture_transfer(q, font_tex, 1024, 512, GS_PSM_8H, font_indexed_addr, 1024);
@@ -49,7 +49,7 @@ void fontengine_init(void)
 	free(gif_packet);
 }
 
-qword_t *fontengine_print_string(qword_t *q, const char *str, int x, int y, int z)
+qword_t* fontengine_print_string(qword_t* q, const char* str, int* x, int* y, int z)
 {
 	PACK_GIFTAG(q, GIF_SET_TAG(1, 0, GIF_PRE_DISABLE, 0, GIF_FLG_PACKED, 2), GIF_REG_AD | (GIF_REG_AD << 4));
 	q++;
@@ -58,17 +58,23 @@ qword_t *fontengine_print_string(qword_t *q, const char *str, int x, int y, int 
 	q->dw[1] = GS_REG_TEX0;
 	q++;
 	// TEX1 (Enable Bilinear)
-	q->dw[0] = GS_SET_TEX1(1,0,1,1,0,0,0);
+	q->dw[0] = GS_SET_TEX1(1, 0, 1, 1, 0, 0, 0);
 	q->dw[1] = GS_REG_TEX1;
+	q++;
+	qword_t* char_giftag_start = q; // See note below loop
 	q++;
 
 	size_t char_cnt = strlen(str);
-	PACK_GIFTAG(q, GIF_SET_TAG(char_cnt, 1, GIF_PRE_ENABLE, GIF_SET_PRIM(GIF_PRIM_SPRITE, 0, 1, 0, 0, 0, 1, 0, 0), GIF_FLG_PACKED, 4),
-				GIF_REG_UV | (GIF_REG_XYZ2 << 4) | (GIF_REG_UV << 8) | (GIF_REG_XYZ2 << 12));
-	q++;
-
 	for (int i = 0; i < char_cnt; i++)
 	{
+		if (str[i] == '\n')
+		{
+			*x = 0;
+			*y += FE_HEIGHT;
+
+			char_cnt--;
+			continue;
+		}
 		u32 UVX = (str[i] % 16) * 64;
 		u32 UVY = ((str[i] / 16) - 2) * 64;
 		// UV (Offset by 0.5, might make it look better?)
@@ -76,7 +82,7 @@ qword_t *fontengine_print_string(qword_t *q, const char *str, int x, int y, int 
 		q->dw[1] = 0;
 		q++;
 		// XYZ2
-		q->dw[0] = (u64)(((((i * (FE_WIDTH / 2)) + x)) << 4) | (((u64)(y << 4)) << 32));
+		q->dw[0] = (u64)((*x << 4) | ((u64)(*y << 4) << 32));
 		q->dw[1] = (u64)(z);
 		q++;
 		// UV
@@ -84,9 +90,15 @@ qword_t *fontengine_print_string(qword_t *q, const char *str, int x, int y, int 
 		q->dw[1] = 0;
 		q++;
 		// XYZ2
-		q->dw[0] = (u64)(((((i * (FE_WIDTH / 2)) + x) + (FE_WIDTH)) << 4) | (((u64)((y + FE_HEIGHT) << 4)) << 32));
+		q->dw[0] = (u64)(((*x + (FE_WIDTH)) << 4) | ((u64)((*y + FE_HEIGHT) << 4) << 32));
 		q->dw[1] = (u64)(z);
 		q++;
+		*x += FE_WIDTH / 2;
 	}
+
+	// Set the GIFTAG here (to the pointer saved above).
+	// Newlines for example and skipped and decrease the amount in char_cnt
+	PACK_GIFTAG(char_giftag_start, GIF_SET_TAG(char_cnt, 1, GIF_PRE_ENABLE, GIF_SET_PRIM(GIF_PRIM_SPRITE, 0, 1, 0, 0, 0, 1, 0, 0), GIF_FLG_PACKED, 4),
+		GIF_REG_UV | (GIF_REG_XYZ2 << 4) | (GIF_REG_UV << 8) | (GIF_REG_XYZ2 << 12));
 	return q;
 }

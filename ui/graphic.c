@@ -97,14 +97,13 @@ void graphic_init(void)
 {
 	graphic_init_load_textures();
 
-	qword_t *gif_packet = (qword_t *)aligned_alloc(64, sizeof(qword_t) * 10);
+	qword_t* gif_packet = (qword_t*)aligned_alloc(64, sizeof(qword_t) * 10);
 
-	qword_t *q = gif_packet;
+	qword_t* q = gif_packet;
 	// Set registers that only need to be set once and clear the screen
 	{
 		PACK_GIFTAG(q, GIF_SET_TAG(1, 1, GIF_PRE_ENABLE, GIF_PRIM_SPRITE, GIF_FLG_PACKED, 7),
-					GIF_REG_AD | (GIF_REG_AD << 4) | (GIF_REG_AD << 8) | (GIF_REG_RGBAQ << 12)
-					| (GIF_REG_XYZ2 << 16) | (GIF_REG_XYZ2 << 20) | (GIF_REG_AD << 24));
+			GIF_REG_AD | (GIF_REG_AD << 4) | (GIF_REG_AD << 8) | (GIF_REG_RGBAQ << 12) | (GIF_REG_XYZ2 << 16) | (GIF_REG_XYZ2 << 20) | (GIF_REG_AD << 24));
 		q++;
 		// ALPHA
 		// Cs * As
@@ -152,7 +151,7 @@ void graphic_init(void)
 	qword_t *VU1_QW = (qword_t *)&VU1_DATA_PTR[4];
 
 	PACK_GIFTAG(VU1_QW, GIF_SET_TAG(1, 0, GIF_PRE_ENABLE, GIF_PRIM_SPRITE, GIF_FLG_PACKED, 5),
-				(GIF_REG_AD) | (GIF_REG_RGBAQ << 4) | (GIF_REG_XYZ2 << 8) | (GIF_REG_XYZ2 << 12) | (GIF_REG_AD << 16));
+		(GIF_REG_AD) | (GIF_REG_RGBAQ << 4) | (GIF_REG_XYZ2 << 8) | (GIF_REG_XYZ2 << 12) | (GIF_REG_AD << 16));
 	VU1_QW++;
 	{ // Sprite clear
 		// TEST (Make the zbuffer pass everything, so we can clear this area)
@@ -178,7 +177,7 @@ void graphic_init(void)
 	}
 	// addr(8)
 	PACK_GIFTAG(VU1_QW, GIF_SET_TAG(2, 1, GIF_PRE_ENABLE, GIF_SET_PRIM(GIF_PRIM_SPRITE, 0, 1, 0, 1, 0, 0, 0, 0), GIF_FLG_PACKED, 6),
-				GIF_REG_AD | (GIF_REG_ST << 4) | (GIF_REG_RGBAQ << 8) | (GIF_REG_XYZ2 << 12) | (GIF_REG_ST << 16) | (GIF_REG_XYZ2 << 20));
+		GIF_REG_AD | (GIF_REG_ST << 4) | (GIF_REG_RGBAQ << 8) | (GIF_REG_XYZ2 << 12) | (GIF_REG_ST << 16) | (GIF_REG_XYZ2 << 20));
 	VU1_QW++;
 	{ // Bongo cat
 		// TEX0 (Gets replaced by the VU depending on the current texture frame)

@@ -19,7 +19,7 @@
 framebuffer_t g_fb;
 zbuffer_t g_zb;
 
-static void intc_vsync_handler(s32 alarm_id, u16 time, void *common)
+static void intc_vsync_handler(s32 alarm_id, u16 time, void* common)
 {
 	graphic_draw_fast();
 	fontqueue_kick();
@@ -29,7 +29,7 @@ static void intc_vsync_handler(s32 alarm_id, u16 time, void *common)
 static void gs_init(void)
 {
 	// Reset GIF
-	(*(volatile u_int *)0x10003000) = 1;
+	(*(volatile u_int*)0x10003000) = 1;
 
 	g_fb.width = 640;
 	g_fb.height = 448;
@@ -64,7 +64,7 @@ void menu_init(void)
 	graph_wait_vsync();
 
 	DIntr();
-	AddIntcHandler(INTC_VBLANK_S, (void *)intc_vsync_handler, 0);
+	AddIntcHandler(INTC_VBLANK_S, (void*)intc_vsync_handler, 0);
 	EnableIntc(INTC_VBLANK_S);
 	EIntr();
 }
@@ -73,7 +73,7 @@ void menu_init(void)
 void menu_status(const char *fmt, ...)
 {
 	va_list args;
-    va_start(args, fmt);
+	va_start(args, fmt);
 
 	char str[256];
 	vsnprintf(str, sizeof(str), fmt, args);
