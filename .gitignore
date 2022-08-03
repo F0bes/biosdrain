@@ -11,5 +11,4 @@
 
 .vscode/*
 
-biosdrain_tex.c
-*tex_*.c
+*tex*.c

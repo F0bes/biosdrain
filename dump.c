@@ -100,7 +100,7 @@ void dump_init(u32 use_usb)
 	}
 
 	if(modelname_read(dump_filename) != 0)
-		menu_status("Warning: Unable to get the model name\nFile name will be set to 'Unknown'\n");
+		menu_status("Warning: Unable to get the model name\nFile name will be set to 'Unknown'");
 }
 
 void dump_exec()
@@ -116,11 +116,11 @@ void dump_exec()
 				FlushCache(0);
 				menu_status("Writing to file...");
 				dump_file(dump_jobs[i]);
-				menu_status("Finished\n");
+				menu_status("Finished");
 			}
 			else
 			{
-				menu_status("Dump failed, result %d\n", ret);
+				menu_status("Dump failed, result %d", ret);
 			}
 		}
 	}
