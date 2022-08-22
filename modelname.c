@@ -25,13 +25,13 @@ static int sceCdAltRM(char *ModelName, int *stat)
 	int result1, result2;
 
 	sdata = 0;
-	result1 = sceCdApplySCmd(0x17, &sdata, 1, rdata, 9);
+	result1 = sceCdApplySCmd(0x17, &sdata, 1, rdata);
 
 	*stat = rdata[0];
 	memcpy(ModelName, &rdata[1], 8);
 
 	sdata = 8;
-	result2 = sceCdApplySCmd(0x17, &sdata, 1, rdata, 9);
+	result2 = sceCdApplySCmd(0x17, &sdata, 1, rdata);
 
 	*stat |= rdata[0];
 	memcpy(&ModelName[8], &rdata[1], 8);

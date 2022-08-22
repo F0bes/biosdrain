@@ -39,17 +39,17 @@ static u8 OSDConfigBuffer[CONFIG_BLOCK_SIZE * 2];
 // Local function prototypes
 static int InitMGRegion(void);
 static int ConsoleInitRegion(void);
-static int ConsoleRegionParamsInitPS1DRV(const char *romver);
+static int ConsoleRegionParamsInitPS1DRV(const char* romver);
 static int GetConsoleRegion(void);
-static int CdReadOSDRegionParams(char *OSDVer);
+static int CdReadOSDRegionParams(char* OSDVer);
 static int GetOSDRegion(void);
-static void InitOSDDefaultLanguage(int region, const char *language);
-static int ReadOSDConfigPS2(OSDConfig2_t *config, const OSDConfigStore_t *OSDConfigBuffer);
-static void ReadOSDConfigPS1(OSDConfig1_t *config, const OSDConfigStore_t *OSDConfigBuffer);
-static void WriteOSDConfigPS1(OSDConfigStore_t *OSDConfigBuffer, const OSDConfig1_t *config);
-static int WriteOSDConfigPS2(OSDConfigStore_t *OSDConfigBuffer, const OSDConfig2_t *config, u8 invalid);
-static void ReadConfigFromNVM(u8 *buffer);
-static void WriteConfigToNVM(const u8 *buffer);
+static void InitOSDDefaultLanguage(int region, const char* language);
+static int ReadOSDConfigPS2(OSDConfig2_t* config, const OSDConfigStore_t* OSDConfigBuffer);
+static void ReadOSDConfigPS1(OSDConfig1_t* config, const OSDConfigStore_t* OSDConfigBuffer);
+static void WriteOSDConfigPS1(OSDConfigStore_t* OSDConfigBuffer, const OSDConfig1_t* config);
+static int WriteOSDConfigPS2(OSDConfigStore_t* OSDConfigBuffer, const OSDConfig2_t* config, u8 invalid);
+static void ReadConfigFromNVM(u8* buffer);
+static void WriteConfigToNVM(const u8* buffer);
 
 // Directory names
 static char SystemDataFolder[] = "BRDATA-SYSTEM";
@@ -87,7 +87,7 @@ int cdInitAdd(void)
 	 This function provides an equivalent of the sceCdGetRegionParams function from the newer CDVDMAN modules. The old CDVDFSV and CDVDMAN modules don't support this S-command.
 	It's supported by only slimline consoles, and returns regional information (e.g. MECHACON version, MG region mask, DVD player region letter etc.).
 */
-int sceCdAltReadRegionParams(u8 *data, u32 *stat)
+int sceCdAltReadRegionParams(u8* data, u32* stat)
 {
 	unsigned char RegionData[15];
 	int result;
@@ -95,7 +95,7 @@ int sceCdAltReadRegionParams(u8 *data, u32 *stat)
 	memset(data, 0, 13);
 	if (MECHACON_CMD_S36_supported)
 	{
-		if ((result = sceCdApplySCmd(0x36, NULL, 0, RegionData, sizeof(RegionData))) != 0)
+		if ((result = sceCdApplySCmd(0x36, NULL, 0, RegionData)) != 0)
 		{
 			*stat = RegionData[0];
 			memcpy(data, &RegionData[1], 13);
@@ -168,7 +168,7 @@ static int ConsoleInitRegion(void)
 	return InitMGRegion();
 }
 
-static int ConsoleRegionParamsInitPS1DRV(const char *romver)
+static int ConsoleRegionParamsInitPS1DRV(const char* romver)
 {
 	int result;
 
@@ -183,7 +183,7 @@ static int ConsoleRegionParamsInitPS1DRV(const char *romver)
 	return result;
 }
 
-int OSDGetPS1DRVRegion(char *region)
+int OSDGetPS1DRVRegion(char* region)
 {
 	int result;
 
@@ -198,7 +198,7 @@ int OSDGetPS1DRVRegion(char *region)
 	return result;
 }
 
-int OSDGetDVDPlayerRegion(char *region)
+int OSDGetDVDPlayerRegion(char* region)
 {
 	int result;
 
@@ -228,18 +228,18 @@ static int GetConsoleRegion(void)
 
 			switch (romver[4])
 			{
-			case 'C':
-				ConsoleRegion = CONSOLE_REGION_CHINA;
-				break;
-			case 'E':
-				ConsoleRegion = CONSOLE_REGION_EUROPE;
-				break;
-			case 'H':
-			case 'A':
-				ConsoleRegion = CONSOLE_REGION_USA;
-				break;
-			case 'J':
-				ConsoleRegion = CONSOLE_REGION_JAPAN;
+				case 'C':
+					ConsoleRegion = CONSOLE_REGION_CHINA;
+					break;
+				case 'E':
+					ConsoleRegion = CONSOLE_REGION_EUROPE;
+					break;
+				case 'H':
+				case 'A':
+					ConsoleRegion = CONSOLE_REGION_USA;
+					break;
+				case 'J':
+					ConsoleRegion = CONSOLE_REGION_JAPAN;
 			}
 
 			result = ConsoleRegion;
@@ -251,7 +251,7 @@ static int GetConsoleRegion(void)
 	return result;
 }
 
-static int CdReadOSDRegionParams(char *OSDVer)
+static int CdReadOSDRegionParams(char* OSDVer)
 {
 	int result;
 
@@ -292,29 +292,29 @@ static int GetOSDRegion(void)
 			CdReadOSDRegionParams(OSDVer);
 			switch (OSDVer[4])
 			{
-			case 'A':
-				ConsoleOSDRegion = OSD_REGION_USA;
-				break;
-			case 'C':
-				ConsoleOSDRegion = OSD_REGION_CHINA;
-				break;
-			case 'E':
-				ConsoleOSDRegion = OSD_REGION_EUROPE;
-				break;
-			case 'H':
-				ConsoleOSDRegion = OSD_REGION_ASIA;
-				break;
-			case 'J':
-				ConsoleOSDRegion = OSD_REGION_JAPAN;
-				break;
-			case 'K':
-				ConsoleOSDRegion = OSD_REGION_KOREA;
-				break;
-			case 'R':
-				ConsoleOSDRegion = OSD_REGION_RUSSIA;
-				break;
-			default:
-				ConsoleOSDRegion = OSD_REGION_INVALID;
+				case 'A':
+					ConsoleOSDRegion = OSD_REGION_USA;
+					break;
+				case 'C':
+					ConsoleOSDRegion = OSD_REGION_CHINA;
+					break;
+				case 'E':
+					ConsoleOSDRegion = OSD_REGION_EUROPE;
+					break;
+				case 'H':
+					ConsoleOSDRegion = OSD_REGION_ASIA;
+					break;
+				case 'J':
+					ConsoleOSDRegion = OSD_REGION_JAPAN;
+					break;
+				case 'K':
+					ConsoleOSDRegion = OSD_REGION_KOREA;
+					break;
+				case 'R':
+					ConsoleOSDRegion = OSD_REGION_RUSSIA;
+					break;
+				default:
+					ConsoleOSDRegion = OSD_REGION_INVALID;
 			}
 
 			if (ConsoleOSDRegion != OSD_REGION_INVALID)
@@ -327,7 +327,7 @@ static int GetOSDRegion(void)
 	return ConsoleOSDRegion;
 }
 
-static void InitOSDDefaultLanguage(int region, const char *language)
+static void InitOSDDefaultLanguage(int region, const char* language)
 {
 	int DefaultLang;
 
@@ -369,23 +369,23 @@ static void InitOSDDefaultLanguage(int region, const char *language)
 		{
 			switch (region)
 			{
-			case OSD_REGION_JAPAN:
-				DefaultLang = LANGUAGE_JAPANESE;
-				break;
-			case OSD_REGION_CHINA:
-				DefaultLang = LANGUAGE_SIMPL_CHINESE;
-				break;
-			case OSD_REGION_RUSSIA:
-				DefaultLang = LANGUAGE_RUSSIAN;
-				break;
-			case OSD_REGION_KOREA:
-				DefaultLang = LANGUAGE_KOREAN;
-				break;
-			case OSD_REGION_USA:
-			case OSD_REGION_EUROPE:
-			case OSD_REGION_ASIA:
-			default:
-				DefaultLang = LANGUAGE_ENGLISH;
+				case OSD_REGION_JAPAN:
+					DefaultLang = LANGUAGE_JAPANESE;
+					break;
+				case OSD_REGION_CHINA:
+					DefaultLang = LANGUAGE_SIMPL_CHINESE;
+					break;
+				case OSD_REGION_RUSSIA:
+					DefaultLang = LANGUAGE_RUSSIAN;
+					break;
+				case OSD_REGION_KOREA:
+					DefaultLang = LANGUAGE_KOREAN;
+					break;
+				case OSD_REGION_USA:
+				case OSD_REGION_EUROPE:
+				case OSD_REGION_ASIA:
+				default:
+					DefaultLang = LANGUAGE_ENGLISH;
 			}
 		}
 
@@ -397,20 +397,20 @@ int OSDIsLanguageValid(int region, int language)
 {
 	switch (region)
 	{
-	case OSD_REGION_JAPAN:
-		return (language == LANGUAGE_JAPANESE || language == LANGUAGE_ENGLISH) ? language : -1;
-	case OSD_REGION_CHINA:
-		return (language == LANGUAGE_ENGLISH || language == LANGUAGE_SIMPL_CHINESE) ? language : -1;
-	case OSD_REGION_RUSSIA:
-		return (language == LANGUAGE_ENGLISH || language == LANGUAGE_RUSSIAN) ? language : -1;
-	case OSD_REGION_KOREA:
-		return (language == LANGUAGE_ENGLISH || language == LANGUAGE_KOREAN) ? language : -1;
-	case OSD_REGION_ASIA:
-		return (language == LANGUAGE_ENGLISH || language == LANGUAGE_TRAD_CHINESE) ? language : -1;
-	case OSD_REGION_USA:
-	case OSD_REGION_EUROPE:
-	default:
-		return (language <= LANGUAGE_PORTUGUESE && region > OSD_REGION_JAPAN) ? language : -1;
+		case OSD_REGION_JAPAN:
+			return (language == LANGUAGE_JAPANESE || language == LANGUAGE_ENGLISH) ? language : -1;
+		case OSD_REGION_CHINA:
+			return (language == LANGUAGE_ENGLISH || language == LANGUAGE_SIMPL_CHINESE) ? language : -1;
+		case OSD_REGION_RUSSIA:
+			return (language == LANGUAGE_ENGLISH || language == LANGUAGE_RUSSIAN) ? language : -1;
+		case OSD_REGION_KOREA:
+			return (language == LANGUAGE_ENGLISH || language == LANGUAGE_KOREAN) ? language : -1;
+		case OSD_REGION_ASIA:
+			return (language == LANGUAGE_ENGLISH || language == LANGUAGE_TRAD_CHINESE) ? language : -1;
+		case OSD_REGION_USA:
+		case OSD_REGION_EUROPE:
+		default:
+			return (language <= LANGUAGE_PORTUGUESE && region > OSD_REGION_JAPAN) ? language : -1;
 	}
 }
 
@@ -454,14 +454,14 @@ int OSDGetDefaultLanguage(void)
 					In the homebrew PS2SDK, this was previously known as the "region".
 		japLanguage = 0 (Japanese, protokernel consoles only), 1 = non-Japanese (Protokernel consoles only). Newer browsers have this set always to 1.
 */
-static int ReadOSDConfigPS2(OSDConfig2_t *config, const OSDConfigStore_t *OSDConfigBuffer)
+static int ReadOSDConfigPS2(OSDConfig2_t* config, const OSDConfigStore_t* OSDConfigBuffer)
 {
 	config->spdifMode = OSDConfigBuffer->PS2.spdifMode;
 	config->screenType = OSDConfigBuffer->PS2.screenType;
 	config->videoOutput = OSDConfigBuffer->PS2.videoOutput;
 
 	if (OSDConfigBuffer->PS2.extendedLanguage) // Extended/Basic language set
-	{										   // One of the 8 standard languages
+	{ // One of the 8 standard languages
 		config->language = OSDConfigBuffer->PS2.language;
 	}
 	else
@@ -482,7 +482,7 @@ static int ReadOSDConfigPS2(OSDConfig2_t *config, const OSDConfigStore_t *OSDCon
 	return (OSDConfigBuffer->PS2.osdInit ^ 1);
 }
 
-static void ReadOSDConfigPS1(OSDConfig1_t *config, const OSDConfigStore_t *OSDConfigBuffer)
+static void ReadOSDConfigPS1(OSDConfig1_t* config, const OSDConfigStore_t* OSDConfigBuffer)
 {
 	int i;
 
@@ -490,7 +490,7 @@ static void ReadOSDConfigPS1(OSDConfig1_t *config, const OSDConfigStore_t *OSDCo
 		config->data[i] = OSDConfigBuffer->PS1.bytes[i];
 }
 
-static void WriteOSDConfigPS1(OSDConfigStore_t *OSDConfigBuffer, const OSDConfig1_t *config)
+static void WriteOSDConfigPS1(OSDConfigStore_t* OSDConfigBuffer, const OSDConfig1_t* config)
 {
 	int i;
 
@@ -498,7 +498,7 @@ static void WriteOSDConfigPS1(OSDConfigStore_t *OSDConfigBuffer, const OSDConfig
 		OSDConfigBuffer->PS1.bytes[i] = config->data[i];
 }
 
-static int WriteOSDConfigPS2(OSDConfigStore_t *OSDConfigBuffer, const OSDConfig2_t *config, u8 invalid)
+static int WriteOSDConfigPS2(OSDConfigStore_t* OSDConfigBuffer, const OSDConfig2_t* config, u8 invalid)
 {
 	int japLanguage, version, osdInitValue;
 
@@ -545,7 +545,7 @@ static int WriteOSDConfigPS2(OSDConfigStore_t *OSDConfigBuffer, const OSDConfig2
 	return 0;
 }
 
-static void ReadConfigFromNVM(u8 *buffer)
+static void ReadConfigFromNVM(u8* buffer)
 { /*	Hmm. What should the check for stat be? In v1.xx, it seems to be a check against 0x9. In v2.20, it checks against 0x81.
 	  In the HDD Browser, reading checks against 0x81, while writing checks against 0x9.
 	  But because we are targeting all consoles, it would be probably safer to follow the HDD Browser. */
@@ -568,7 +568,7 @@ static void ReadConfigFromNVM(u8 *buffer)
 	} while ((stat & 0x81) || (result == 0));
 }
 
-static void WriteConfigToNVM(const u8 *buffer)
+static void WriteConfigToNVM(const u8* buffer)
 { // Read the comment in ReadConfigFromNVM() about the error status bits.
 	u32 stat;
 	int result;
@@ -589,43 +589,43 @@ static void WriteConfigToNVM(const u8 *buffer)
 	} while ((stat & 9) || (result == 0));
 }
 
-int OSDLoadConfigFromNVM(OSDConfig1_t *osdConfigPS1, OSDConfig2_t *osdConfigPS2)
+int OSDLoadConfigFromNVM(OSDConfig1_t* osdConfigPS1, OSDConfig2_t* osdConfigPS2)
 {
 	int result;
 
 	ReadConfigFromNVM(OSDConfigBuffer);
-	result = ReadOSDConfigPS2(osdConfigPS2, (const OSDConfigStore_t *)OSDConfigBuffer);
-	ReadOSDConfigPS1(osdConfigPS1, (const OSDConfigStore_t *)OSDConfigBuffer);
+	result = ReadOSDConfigPS2(osdConfigPS2, (const OSDConfigStore_t*)OSDConfigBuffer);
+	ReadOSDConfigPS1(osdConfigPS1, (const OSDConfigStore_t*)OSDConfigBuffer);
 
 	return result;
 }
 
-int OSDSaveConfigToNVM(const OSDConfig1_t *osdConfigPS1, const OSDConfig2_t *osdConfigPS2, u8 invalid)
+int OSDSaveConfigToNVM(const OSDConfig1_t* osdConfigPS1, const OSDConfig2_t* osdConfigPS2, u8 invalid)
 {
-	WriteOSDConfigPS1((OSDConfigStore_t *)OSDConfigBuffer, osdConfigPS1);
-	WriteOSDConfigPS2((OSDConfigStore_t *)OSDConfigBuffer, osdConfigPS2, invalid);
+	WriteOSDConfigPS1((OSDConfigStore_t*)OSDConfigBuffer, osdConfigPS1);
+	WriteOSDConfigPS2((OSDConfigStore_t*)OSDConfigBuffer, osdConfigPS2, invalid);
 	WriteConfigToNVM(OSDConfigBuffer);
 
 	return 0;
 }
 
 // Directory management
-const char *OSDGetHistoryDataFolder(void)
+const char* OSDGetHistoryDataFolder(void)
 {
 	return SystemDataFolder;
 }
 
-const char *OSDGetSystemDataFolder(void)
+const char* OSDGetSystemDataFolder(void)
 {
 	return SystemDataFolder;
 }
 
-const char *OSDGetSystemExecFolder(void)
+const char* OSDGetSystemExecFolder(void)
 {
 	return SystemExecFolder;
 }
 
-const char *OSDGetDVDPLExecFolder(void)
+const char* OSDGetDVDPLExecFolder(void)
 {
 	return DVDPLExecFolder;
 }

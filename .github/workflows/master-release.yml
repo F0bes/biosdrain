@@ -24,11 +24,13 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: master
+          custom_release_rules: "release:major:New release!"
 
       - uses: actions/checkout@v2
       - run: |
           git config --global --add safe.directory /__w/biosdrain/biosdrain
-          git fetch --prune --unshallow
+          git fetch --prune --unshallow --tags
 
       - name: Compile project
         run: |

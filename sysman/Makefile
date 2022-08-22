@@ -1,8 +1,7 @@
 IOP_BIN  = sysman.irx
 IOP_OBJS = romdrv/romdrv.o main.o iLink.o dev9.o usb.o spu2.o rom.o imports.o
 
-IOP_CFLAGS += -Werror -fno-builtin -G8192 -mgpopt
-IOP_LDFLAGS += -s
+IOP_CFLAGS += -Werror
 
 all: $(IOP_BIN)
 
