@@ -73,23 +73,31 @@ void graphic_init_load_textures(void)
 		q = texBuffer;
 		q = draw_texture_transfer(q, &bongo_tex_2[0], 256, 256, 0, g_bongo2_texaddress, 256);
 		q = draw_texture_flush(q);
+		dma_channel_send_chain(DMA_CHANNEL_GIF, texBuffer, q - texBuffer, 0, 0);
+		dma_channel_wait(DMA_CHANNEL_GIF, 0);
 	}
-	dma_channel_send_chain(DMA_CHANNEL_GIF, texBuffer, q - texBuffer, 0, 0);
-	dma_channel_wait(DMA_CHANNEL_GIF, 0);
-
+	{ // Set bilinear
+		q = texBuffer;
+		PACK_GIFTAG(q, GIF_SET_TAG(1, 1, GIF_PRE_DISABLE, 0, GIF_FLG_PACKED, 1),
+			GIF_REG_AD);
+		q++;
+		q->dw[0] = GS_SET_TEX1(1, 0, 1, 1, 0, 0, 0);
+		q->dw[1] = GS_REG_TEX1;
+		q++;
+		dma_channel_send_normal(DMA_CHANNEL_GIF, texBuffer, q - texBuffer, 0, 0);
+		dma_channel_wait(DMA_CHANNEL_GIF, 0);
+	}
 	free(texBuffer);
 }
 
 static qword_t* biosdrain_texture_rgbaq = NULL;
+s32 graphic_vsync_sema;
 void graphic_biosdrain_fadein()
 {
-	// TODO: make it so we fade in with vertex colours, not alpha
-	// Because we no longer use a CT32 framebuffer
 	for (int a = 0; a < 255; a++)
 	{
-		graph_wait_vsync();
+		WaitSema(graphic_vsync_sema);
 		biosdrain_texture_rgbaq->dw[1] = (u64)((0xFF) | ((u64)a << 32));
-		graph_wait_vsync();
 	}
 }
 

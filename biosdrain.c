@@ -109,7 +109,7 @@ void load_irx_usb()
 	u32 v_cnt = 0;
 	while (v_cnt < 300)
 	{
-		graph_wait_vsync();
+		WaitSema(graphic_vsync_sema);
 		v_cnt++;
 	}
 };
