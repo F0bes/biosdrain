@@ -61,7 +61,7 @@ void LoadSystemInformation()
 	menu_status("- ROM0 exists? %s\n", g_hardwareInfo.ROMs[0].IsExists ? "Yes" : "No");
 	if (g_hardwareInfo.ROMs[0].IsExists)
 	{
-		menu_status("- ROM0 ADDR and SIZE: %08X %08X", g_hardwareInfo.ROMs[0].StartAddress, g_hardwareInfo.ROMs[0].size);
+		menu_status("- ROM0 ADDR and SIZE: %08X %08X\n", g_hardwareInfo.ROMs[0].StartAddress, g_hardwareInfo.ROMs[0].size);
 	}
 
 	menu_status("- DVD exists? %s\n", g_hardwareInfo.DVD_ROM.IsExists ? "Yes" : "No");
