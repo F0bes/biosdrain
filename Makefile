@@ -1,4 +1,4 @@
-EE_BIN ?= biosdrain.elf
+EE_BIN = biosdrain.elf
 EE_OBJS = biosdrain.o OSDInit.o sysman_rpc.o ui/menu.o dump.o modelname.o
 EE_OBJS += ui/fontqueue.o ui/tex/font/font_tex.o ui/tex/font/font_pallete_tex.o ui/fontengine.o
 EE_OBJS += ui/graphic.o ui/graphic_vu.o ui/tex/bongo_tex_1.o ui/tex/bongo_tex_2.o ui/tex/biosdrain_tex.o
@@ -57,7 +57,7 @@ ui/tex/font/font_pallete_tex.c: ui/tex/font/font_pallete_tex.raw
 
 clean:
 	$(MAKE) -C sysman clean
-	rm -f $(EE_BIN_RESET) $(EE_BIN_NORESET) $(EE_OBJS) $(IRX_C_FILES)
+	rm -f $(EE_OBJS) $(IRX_C_FILES)
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)
