@@ -14,7 +14,6 @@
 static u32 dump_rom0_func();
 static u32 dump_rom1_func();
 static u32 dump_rom2_func();
-static u32 dump_erom_func();
 static u32 dump_nvm_func();
 static u32 dump_mec_func();
 
@@ -63,7 +62,7 @@ void dump_init(u32 use_usb)
 		dump_jobs[1].dump_name = "ROM1";
 		dump_jobs[1].dump_fext = "rom1";
 		dump_jobs[1].dump_func = dump_rom1_func;
-		dump_jobs[1].dump_size = 0x80000;
+		dump_jobs[1].dump_size = 0x400000;
 		dump_jobs[1].enabled = g_hardwareInfo.ROMs[1].IsExists;
 	}
 	// ROM2
@@ -73,14 +72,6 @@ void dump_init(u32 use_usb)
 		dump_jobs[2].dump_func = dump_rom2_func;
 		dump_jobs[2].dump_size = 0x80000;
 		dump_jobs[2].enabled = g_hardwareInfo.ROMs[1].IsExists;
-	}
-	// EROM
-	{
-		dump_jobs[3].dump_name = "EROM";
-		dump_jobs[3].dump_fext = "erom";
-		dump_jobs[3].dump_func = dump_erom_func;
-		dump_jobs[3].dump_size = g_hardwareInfo.erom.size;
-		dump_jobs[3].enabled = g_hardwareInfo.erom.IsExists;
 	}
 	// NVM
 	{
@@ -131,7 +122,7 @@ void dump_cleanup()
 	free(dump_shared_buffer);
 }
 
-// Used for ROMx and EROM dumps
+// Used for ROMx dumps
 // Pretty much just a SysmanReadMemory wrapper
 static void common_dump_func(u32 start, u32 size)
 {
@@ -160,17 +151,12 @@ static u32 dump_rom0_func()
 }
 static u32 dump_rom1_func()
 {
-	common_dump_func(g_hardwareInfo.ROMs[1].StartAddress, 0x80000);
+	common_dump_func(g_hardwareInfo.ROMs[1].StartAddress, 0x400000);
 	return 0;
 }
 static u32 dump_rom2_func()
 {
 	common_dump_func(g_hardwareInfo.ROMs[2].StartAddress, 0x80000);
-	return 0;
-}
-static u32 dump_erom_func()
-{
-	common_dump_func(g_hardwareInfo.erom.StartAddress, g_hardwareInfo.erom.size);
 	return 0;
 }
 static u32 dump_nvm_func()
