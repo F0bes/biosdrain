@@ -40,18 +40,6 @@ void sysman_prerequesites()
 {
 	SifLoadModule("rom0:ADDDRV", 0, NULL);
 	SifLoadModule("rom0:ADDROM2", 0, NULL);
-
-	// Replace ? with a null terminator, required on some regions
-	char eromdrv[] = "rom1:EROMDRV?";
-	if (OSDGetDVDPlayerRegion(&eromdrv[12]) == 0 || eromdrv[12] != '\0')
-	{
-		eromdrv[12] = '\0'; // Replace '?' with a NULL.
-	}
-
-	// Finally, load the encrypted module
-	// Note, this doesn't work on pcsx2 and we will assume that there is no
-	// erom
-	SifLoadModuleEncrypted(eromdrv, 0, NULL);
 }
 
 t_SysmanHardwareInfo g_hardwareInfo;
@@ -66,7 +54,6 @@ void LoadSystemInformation()
 
 	menu_status("- DVD exists? %s\n", g_hardwareInfo.DVD_ROM.IsExists ? "Yes" : "No");
 	menu_status("- ROM1 exists? %s\n", g_hardwareInfo.ROMs[1].IsExists ? "Yes" : "No");
-	menu_status("- EROM exists? %s\n", g_hardwareInfo.erom.IsExists ? "Yes" : "No");
 	menu_status("- ROM2 exists? %s\n", g_hardwareInfo.ROMs[2].IsExists ? "Yes" : "No");
 
 	if (g_hardwareInfo.DVD_ROM.IsExists)
@@ -76,13 +63,6 @@ void LoadSystemInformation()
 	if (g_hardwareInfo.ROMs[1].IsExists)
 	{
 		menu_status(" - ROM1 ADDR and SIZE: %08X %08X\n", g_hardwareInfo.ROMs[1].StartAddress, g_hardwareInfo.ROMs[1].size);
-	}
-	if (g_hardwareInfo.erom.IsExists)
-	{
-		// Uses GetLoadcoreInternalData() to get the address of the encrypted module
-		// Turn 0xBE040000 -> 0x1E040000
-		g_hardwareInfo.erom.StartAddress &= ~(0xA << 0x1C);
-		menu_status(" - EROM ADDR and SIZE: %08X %08X\n", g_hardwareInfo.erom.StartAddress, g_hardwareInfo.erom.size);
 	}
 	if (g_hardwareInfo.ROMs[2].IsExists)
 	{

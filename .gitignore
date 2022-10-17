@@ -5,7 +5,6 @@
 *.rom0
 *.rom1
 *.rom2
-*.erom
 *.mec
 *.nvm
 
