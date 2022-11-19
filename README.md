@@ -41,12 +41,10 @@ If the path to your bios was `D:\ps2bios\dump` you'd see one of the below.
 
 ### Currently detects and dumps
  - ROM0
- - ROM1*
- - ROM2*
+ - ROM1 *size fixed at 406kb
+ - ROM2
  - NVM
  - MEC
-
-\* These are dumped at a fixed size of 512kb and at fixed addresses
 
 ### Notes
 
