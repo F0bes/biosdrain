@@ -87,7 +87,7 @@ void load_irx_usb()
 	printf("Waiting 5 seconds for the USB driver to detect the USB device\n");
 	// We are too fast for the USB driver sometimes, so wait ~ 5 seconds
 	u32 v_cnt = 0;
-	while (v_cnt < 300)
+	while (v_cnt < 1000)
 	{
 		WaitSema(graphic_vsync_sema);
 		v_cnt++;
