@@ -39,7 +39,7 @@ void vsync_thread_func(void* unused)
 static void gs_init(void)
 {
 	// Reset GIF
-	(*(volatile u_int*)0x10003000) = 1;
+	(*(volatile u32*)0x10003000) = 1;
 
 	g_fb.width = 640;
 	g_fb.height = 448;
