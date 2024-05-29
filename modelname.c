@@ -61,7 +61,8 @@ int modelname_read(char *name)
 			Oddly, the console models that come with v1.01, like the SCPH-15000 and DTL-H10000,
 			will always be identified as "SCPH-10000" by their ROM OSDSYS programs.
 	*/
-	if (ConsoleROMVER[0] == '0' && ConsoleROMVER[1] == '1' && ConsoleROMVER[2] == '0')
+	// system 2x6 will have region T and machine type Z. explicitly check this to avoid assuming its SCPH-10000
+	if (ConsoleROMVER[0] == '0' && ConsoleROMVER[1] == '1' && ConsoleROMVER[2] == '0' && (ConsoleROMVER[5] != 'Z' || ConsoleROMVER[4] != 'T'))
 	{
 		if (ConsoleROMVER[3] == '0') // For ROM v1.00 (Early SCPH-10000 units).
 			strcpy(name, "SCPH-10000");
