@@ -3,24 +3,36 @@ EE_OBJS = biosdrain.o OSDInit.o sysman_rpc.o ui/menu.o dump.o modelname.o
 EE_OBJS += ui/fontqueue.o ui/tex/font/font_tex.o ui/tex/font/font_pallete_tex.o ui/fontengine.o
 EE_OBJS += ui/graphic.o ui/graphic_vu.o ui/tex/bongo_tex_1.o ui/tex/bongo_tex_2.o ui/tex/biosdrain_tex.o
 IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.o irx/sysman_irx.o
+
+ifeq ($(COH),1)
+  $(info --- building arcade biosdrain)
+  EE_BIN = biosdrain_arcade.elf
+  EE_CFLAGS += -DSUPPORT_SYSTEM_2x6
+  IRX_OBJS += irx/ioprp_img.o
+  EE_LIBS += -liopreboot
+endif
+
 # Bin2c objects that will be linked in
 EE_OBJS += $(IRX_OBJS)
-EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -ldraw
+EE_LIBS += -lkernel -lpatches -ldebug -lgraph -ldma -ldraw
 
 EE_DVP = dvp-as
 
 # Git version
 GIT_VERSION := "$(shell git describe --abbrev=4 --always --tags)"
 
-EE_CFLAGS = -I$(shell pwd) -Werror -DGIT_VERSION="\"$(GIT_VERSION)\""
+EE_CFLAGS += -I$(shell pwd) -Werror -DGIT_VERSION="\"$(GIT_VERSION)\""
 
-IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
+IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c ioprp_img.c
 
 all: sysman_irx $(EE_BIN)
 
 # IRX files to be built and or bin2c'd
 sysman_irx:
 	$(MAKE) -C sysman
+
+irx/ioprp_img.c: irx/arcade_ioprp.img
+	bin2c $< $@ ioprp
 
 irx/sysman_irx.c: sysman/sysman.irx
 	bin2c $< $@ sysman_irx
