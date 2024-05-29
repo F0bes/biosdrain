@@ -151,9 +151,6 @@ int determine_device()
 	{
 		use_usb_dir = 1;
 
-#ifndef NO_RESET_IOP_WHEN_USB
-		reset_iop();
-#endif
 		load_irx_usb();
 
 		if (!mkdir("mass:tmp", 0777))
@@ -190,7 +187,7 @@ void load_irx_sysman()
 int main(void)
 {
 	sio_puts("main()\n");
-
+	reset_iop();
 	menu_init();
 	graphic_init();
 	fontengine_init();
