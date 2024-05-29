@@ -19,6 +19,10 @@
 #include "sysman/sysinfo.h"
 #include "sysman_rpc.h"
 
+#ifdef SUPPORT_SYSTEM_2x6
+#include <iopcontrol_special.h>
+#endif
+
 #include "OSDInit.h"
 
 extern unsigned int size_bdm_irx;
@@ -36,10 +40,17 @@ extern unsigned char usbd_irx[];
 extern unsigned int size_sysman_irx;
 extern unsigned char sysman_irx[];
 
+extern unsigned int size_ioprp;
+extern unsigned char ioprp[];
+
 void sysman_prerequesites()
 {
-	SifLoadModule("rom0:ADDDRV", 0, NULL);
+#ifdef SUPPORT_SYSTEM_2x6
+	SifLoadModule("rom0:ACDEV", 0, NULL); // registers arcade board flash memory as `rom1:`
+#else
+	SifLoadModule("rom0:ADDDRV", 0, NULL); // registers dvdplayer rom as `rom1:`
 	SifLoadModule("rom0:ADDROM2", 0, NULL);
+#endif
 }
 
 t_SysmanHardwareInfo g_hardwareInfo;
@@ -98,13 +109,29 @@ void reset_iop()
 {
 	SifInitRpc(0);
 	// Reset IOP
+#ifdef SUPPORT_SYSTEM_2x6
+	while (!SifIopRebootBuffer(ioprp, size_ioprp))
+		;
+#else
 	while (!SifIopReset("", 0x0))
 		;
+#endif
+
 	while (!SifIopSync())
 		;
 	SifInitRpc(0);
 
 	sbv_patch_enable_lmb();
+#ifdef SUPPORT_SYSTEM_2x6
+	SifLoadModule("rom0:CDVDFSV", 0, NULL); // do it ASAP
+
+	//biosdrain does not use memory card at all, this makes our life easier for dealing with arcade syscon:
+	SifLoadModule("rom0:SIO2MAN", 0, NULL); // dependency of DONGLEMAN
+	SifLoadModule("rom0:MCMAN", 0, NULL); // DONGLEMAN
+	SifLoadModule("rom0:LED", 0, NULL); // LED setter
+	SifLoadModule("rom0:DAEMON", 0, NULL); // security dongle checker. to keep arcade syscon happy
+	//no need for EE RPC or anything.
+#endif
 }
 
 u32 use_usb_dir = 0;
@@ -124,9 +151,6 @@ int determine_device()
 	{
 		use_usb_dir = 1;
 
-#ifndef NO_RESET_IOP_WHEN_USB
-		reset_iop();
-#endif
 		load_irx_usb();
 
 		if (!mkdir("mass:tmp", 0777))
@@ -163,13 +187,16 @@ void load_irx_sysman()
 int main(void)
 {
 	sio_puts("main()\n");
-
+	reset_iop();
 	menu_init();
 	graphic_init();
 	fontengine_init();
 	graphic_biosdrain_fadein();
 
 	menu_status("biosdrain - revision %s\n", GIT_VERSION);
+#ifdef SUPPORT_SYSTEM_2x6
+	menu_status("version with namco system 246/256 (COH-H models) support\n");
+#endif
 	if (determine_device())
 		goto exit_main;
 
@@ -187,3 +214,7 @@ exit_main:
 	menu_status("Finished everything.\n");
 	SleepThread();
 }
+
+#ifdef SUPPORT_SYSTEM_2x6
+void _libcglue_rtc_update() {} // system 246/256 doesnt have CDVDFSV module loaded on boot
+#endif
