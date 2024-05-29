@@ -190,7 +190,9 @@ int main(void)
 	graphic_biosdrain_fadein();
 
 	menu_status("biosdrain - revision %s\n", GIT_VERSION);
+#ifdef SUPPORT_SYSTEM_2x6
 	menu_status("version with namco system 246/256 (COH-H models) support\n");
+#endif
 	if (determine_device())
 		goto exit_main;
 
