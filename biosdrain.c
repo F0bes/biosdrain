@@ -124,6 +124,13 @@ void reset_iop()
 	sbv_patch_enable_lmb();
 #ifdef SUPPORT_SYSTEM_2x6
 	SifLoadModule("rom0:CDVDFSV", 0, NULL); // do it ASAP
+
+	//biosdrain does not use memory card at all, this makes our life easier for dealing with arcade syscon:
+	SifLoadModule("rom0:SIO2MAN", 0, NULL); // dependency of DONGLEMAN
+	SifLoadModule("rom0:MCMAN", 0, NULL); // DONGLEMAN
+	SifLoadModule("rom0:LED", 0, NULL); // LED setter
+	SifLoadModule("rom0:DAEMON", 0, NULL); // security dongle checker. to keep arcade syscon happy
+	//no need for EE RPC or anything.
 #endif
 }
 
