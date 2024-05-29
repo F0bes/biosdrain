@@ -25,9 +25,15 @@ jobs:
       - name: Compile project
         run: |
           make clean all
-          mkdir artifacts
+          mkdir -p artifacts
           cp biosdrain.elf artifacts/biosdrain.elf
 
+          - name: Compile Arcade Variant
+          run: |
+            make clean all COH=1
+            mkdir -p artifacts
+            cp biosdrain_arcade.elf artifacts/biosdrain_arcade.elf
+  
       - name: Upload ELF
         uses: actions/upload-artifact@v2
         with:
