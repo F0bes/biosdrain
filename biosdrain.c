@@ -24,8 +24,8 @@
 extern unsigned int size_bdm_irx;
 extern unsigned char bdm_irx[];
 
-extern unsigned int size_bdmfs_vfat_irx;
-extern unsigned char bdmfs_vfat_irx[];
+extern unsigned int size_bdmfs_fatfs_irx;
+extern unsigned char bdmfs_fatfs_irx[];
 
 extern unsigned int size_usbmass_bd_irx;
 extern unsigned char usbmass_bd_irx[];
@@ -72,27 +72,47 @@ void LoadSystemInformation()
 
 void load_irx_usb()
 {
-	int usbd_irx_id = SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
-	printf("USBD ID is %d\n", usbd_irx_id);
-
 	int bdm_irx_id = SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, NULL);
 	printf("BDM ID: %d\n", bdm_irx_id);
 
-	int bdmfs_vfat_irx_id = SifExecModuleBuffer(&bdmfs_vfat_irx, size_bdmfs_vfat_irx, 0, NULL, NULL);
-	printf("BDMFS VFAT ID: %d\n", bdmfs_vfat_irx_id);
+	int bdmfs_fatfs_irx_id = SifExecModuleBuffer(&bdmfs_fatfs_irx, size_bdmfs_fatfs_irx, 0, NULL, NULL);
+	printf("BDMFS FATFS ID: %d\n", bdmfs_fatfs_irx_id);
+
+	int usbd_irx_id = SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
+	printf("USBD ID is %d\n", usbd_irx_id);
 
 	int usbmass_irx_id = SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, NULL);
 	printf("USB Mass ID is %d\n", usbmass_irx_id);
-
-	printf("Waiting 5 seconds for the USB driver to detect the USB device\n");
-	// We are too fast for the USB driver sometimes, so wait ~ 5 seconds
-	u32 v_cnt = 0;
-	while (v_cnt < 300)
-	{
-		WaitSema(graphic_vsync_sema);
-		v_cnt++;
-	}
 };
+
+int wait_usb_ready()
+{
+	menu_status("Waiting for USB to be ready...\n");
+	//struct stat buffer;
+	int ret = -1;
+	int retries = 600;
+
+	while (ret != 0 && retries > 0) {
+		//ret = stat("mass:/", &buffer);
+		if (mkdir("mass:/tmp", 0777))
+		{
+			rmdir("mass:/tmp");
+			ret = 0;
+			break;
+		}
+		WaitSema(graphic_vsync_sema);
+		retries--;
+	}
+
+	menu_status("USB ready after %d attempts.\n", 601 - retries);
+	if(ret != 0)
+	{
+		menu_status("USB not ready after 10 seconds :(.\n Try a smaller FAT32 partition?.\n");
+		return -1;
+	}
+
+	return 0;
+}
 
 void reset_iop()
 {
@@ -122,30 +142,18 @@ int determine_device()
 	menu_status("Built to force USB and skip HOST.\n");
 #endif
 	{
-		use_usb_dir = 1;
-
-#ifndef NO_RESET_IOP_WHEN_USB
+		printf("Resetting IOP, bye bye!\n");
 		reset_iop();
-#endif
 		load_irx_usb();
 
-		if (!mkdir("mass:tmp", 0777))
-		{
-			rmdir("mass:tmp");
-			use_usb_dir = 1;
-		}
-		else
+		use_usb_dir = !wait_usb_ready();
+
+		if(!use_usb_dir)
 		{
 			menu_status("USB not found, and HOST is not available, not continuing.\n");
-#ifdef NO_RESET_IOP_WHEN_USB
-			menu_status("This is a noreset build.\n"
-						"This is usually necessary for uLaunchELF and USB users.\n"
-						"Please try the 'regular' biosdrain.elf build.\n");
-#endif
 			return 1;
 		}
 	}
-
 	return 0;
 }
 
@@ -184,6 +192,10 @@ int main(void)
 	dump_exec();
 	dump_cleanup();
 exit_main:
-	menu_status("Finished everything.\n");
+	menu_status("Finished everything. You're free to turn off the system.\n");
+	menu_status("\n");
+	menu_status("Interested in PS2 development?\n");
+	menu_status("Check out fobes.dev!\n");
+	menu_status("Support me on ko-fi.com/f0bes!\n");
 	SleepThread();
 }

@@ -2,7 +2,7 @@ EE_BIN = biosdrain.elf
 EE_OBJS = biosdrain.o OSDInit.o sysman_rpc.o ui/menu.o dump.o modelname.o
 EE_OBJS += ui/fontqueue.o ui/tex/font/font_tex.o ui/tex/font/font_pallete_tex.o ui/fontengine.o
 EE_OBJS += ui/graphic.o ui/graphic_vu.o ui/tex/bongo_tex_1.o ui/tex/bongo_tex_2.o ui/tex/biosdrain_tex.o
-IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_vfat_irx.o irx/sysman_irx.o
+IRX_OBJS = irx/usbmass_bd_irx.o irx/usbd_irx.o irx/bdm_irx.o irx/bdmfs_fatfs_irx.o irx/sysman_irx.o
 # Bin2c objects that will be linked in
 EE_OBJS += $(IRX_OBJS)
 EE_LIBS = -lkernel -lpatches -ldebug -lgraph -ldma -ldraw
@@ -14,7 +14,7 @@ GIT_VERSION := "$(shell git describe --abbrev=4 --always --tags)"
 
 EE_CFLAGS = -I$(shell pwd) -Werror -DGIT_VERSION="\"$(GIT_VERSION)\""
 
-IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_vfat_irx.c usbd_irx.c sysman_irx.c
+IRX_C_FILES = usbmass_bd_irx.c bdm_irx.c bdmfs_fatfs_irx.c usbd_irx.c sysman_irx.c
 
 all: sysman_irx $(EE_BIN)
 
@@ -34,8 +34,8 @@ irx/usbmass_bd_irx.c: $(PS2SDK)/iop/irx/usbmass_bd.irx
 irx/bdm_irx.c: $(PS2SDK)/iop/irx/bdm.irx
 	bin2c $< irx/bdm_irx.c bdm_irx
 
-irx/bdmfs_vfat_irx.c: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
-	bin2c $< irx/bdmfs_vfat_irx.c bdmfs_vfat_irx
+irx/bdmfs_fatfs_irx.c: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx
+	bin2c $< irx/bdmfs_fatfs_irx.c bdmfs_fatfs_irx
 
 ui/tex/biosdrain_tex.c: ui/tex/biosdrain_tex.raw
 	bin2c $< ui/tex/biosdrain_tex.c biosdrain_tex

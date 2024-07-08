@@ -11,14 +11,17 @@ Execute biosdrain on the EE. For example: `ps2client execee host:biosdrain.elf`
 biosdrain should automatically detect a host filesystem, and dump the files directly to your computer.
 
 ### - **For USB users (using uLaunchELF)**
-Put the biosdrain.elf file onto a FAT32 formatted USB drive.
+Put the biosdrain.elf file onto a FAT32 (or exFAT!) formatted USB drive.
 
 In uLaunchELF, navigate to `mass:` and execute the biosdrain.elf file you just transferred.
 
 biosdrain should automatically detect a USB drive, and dump the files to the root of the USB drive.
 
+**In the case that biosdrain does not detect a USB drive, try creating a smaller 1GB partition and
+leaving the rest unformatted.**
+
 ### **Using the BIOS with PCSX2**
-Simply download the files (if you've used a USB drive) back to your computer, and keep them somewhere safe so you don't have to do this process again.
+Simply copy the files (if you've used a USB drive) back to your computer, and keep them somewhere safe so you don't have to do this process again.
 
 <br/>
 
@@ -50,4 +53,5 @@ If the path to your bios was `D:\ps2bios\dump` you'd see one of the below.
 
 This software has been based off of the work from [PS2Ident](https://github.com/ps2homebrew/PS2Ident) licensed under AFL license-3.0 . The Sysman and Romdrv module source have been taken from there as well.
 
-Issues and pull requests are very much welcome. The issue tracker may be used by users to report successful dumping as well, as I only have a single 39K to test on. Please make sure your model doesn't already have a report though.
+Check out https://fobes.dev for some interesting PS2 programming blogs.
+You can support me on KoFi [here](Ko-fi.com/f0bes).

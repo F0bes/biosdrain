@@ -26,16 +26,31 @@ static t_dump dump_jobs[6];
 static char dump_filename[MODEL_NAME_MAX_LEN];
 
 static u32 dump_file_usb = 0;
+extern int errno;
 static u32 dump_file(t_dump job)
 {
 	char path[256];
 	sprintf(path, "%s%s.%s", dump_file_usb ? "mass:" : "host:", dump_filename, job.dump_fext);
 
-	FILE *f = fopen(path, "wb+");
+	FILE *f = fopen(path, "wb");
 	if (!f)
+	{
+		menu_status("Failed to open %d file %s\n", f, path);
 		return 1;
+	}
 
-	fwrite(dump_shared_buffer, 1, job.dump_size, f);
+	u32 written_size = job.dump_size;
+	while(written_size > 0)
+	{
+		u32 write_size = fwrite(dump_shared_buffer, 1, written_size, f);
+		if (write_size == 0)
+		{
+			menu_status("Failed to write to file %s\n", path);
+			fclose(f);
+			return 2;
+		}
+		written_size -= write_size;
+	}
 
 	FlushCache(0);
 
