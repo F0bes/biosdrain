@@ -70,7 +70,7 @@ static void gs_init(void)
 void menu_init(void)
 {
 	gs_init();
-	fontqueue_init(4096);
+	fontqueue_init(8192);
 	graph_wait_vsync();
 
 
@@ -110,7 +110,7 @@ void menu_status(const char* fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 
-	char str[256];
+	char str[1024];
 	vsnprintf(str, sizeof(str), fmt, args);
 	sio_puts(str);
 
