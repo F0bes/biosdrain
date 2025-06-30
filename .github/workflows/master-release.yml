@@ -27,7 +27,7 @@ jobs:
           release_branches: master
           custom_release_rules: "release:major:New release!"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           git config --global --add safe.directory /__w/biosdrain/biosdrain
           git fetch --prune --unshallow --tags
@@ -39,7 +39,7 @@ jobs:
           cp biosdrain.elf binaries/biosdrain.elf
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: steps.tag_version.outputs.new_tag
         with:
           prerelease: true
