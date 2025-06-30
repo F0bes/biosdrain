@@ -94,7 +94,7 @@ int wait_usb_ready()
 
 	while (ret != 0 && retries > 0) {
 		//ret = stat("mass:/", &buffer);
-		if (mkdir("mass:/tmp", 0777))
+		if (mkdir("mass:/tmp", 0777) == 0)
 		{
 			rmdir("mass:/tmp");
 			ret = 0;
