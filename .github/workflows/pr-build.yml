@@ -17,7 +17,7 @@ jobs:
         run: |
           apk add build-base git bash
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           git config --global --add safe.directory /__w/biosdrain/biosdrain
           git fetch --prune --unshallow
@@ -29,7 +29,8 @@ jobs:
           cp biosdrain.elf artifacts/biosdrain.elf
 
       - name: Upload ELF
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
+
         with:
           name: biosdrain
           path: artifacts
