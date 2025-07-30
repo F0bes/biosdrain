@@ -196,6 +196,5 @@ exit_main:
 	menu_status("\n");
 	menu_status("Interested in PS2 development?\n");
 	menu_status("Check out fobes.dev!\n");
-	menu_status("Support me on ko-fi.com/f0bes!\n");
 	SleepThread();
 }

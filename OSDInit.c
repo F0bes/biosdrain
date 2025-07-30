@@ -638,7 +638,8 @@ int OSDInitROMVER(void)
 	if ((fd = open("rom0:ROMVER", O_RDONLY)) >= 0)
 	{
 		read(fd, ConsoleROMVER, ROMVER_MAX_LEN);
-		close(fd);
+		// Appears to cause a badaddr, cause unknown...
+		//close(fd);
 	}
 
 	return 0;
